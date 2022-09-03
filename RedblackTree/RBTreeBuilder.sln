@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RBTreeBuilder", "RBTreeBuilder\RBTreeBuilder.vcxproj", "{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tester", "Tester", "{6BAD8FDC-EA92-4BCB-AC1A-1EF5127DA869}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RBTreeTester", "RBTreeTester\RBTreeTester.vcxproj", "{F1D99D91-E5E1-47B6-B4E2-DB748F255252}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}.Debug|x64.ActiveCfg = Debug|x64
+		{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}.Debug|x64.Build.0 = Debug|x64
+		{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}.Debug|x86.ActiveCfg = Debug|Win32
+		{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}.Debug|x86.Build.0 = Debug|Win32
+		{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}.Release|x64.ActiveCfg = Release|x64
+		{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}.Release|x64.Build.0 = Release|x64
+		{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}.Release|x86.ActiveCfg = Release|Win32
+		{7D4E22DD-5F4C-45E1-AD7D-E1D0BD636230}.Release|x86.Build.0 = Release|Win32
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252}.Debug|x64.ActiveCfg = Debug|x64
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252}.Debug|x64.Build.0 = Debug|x64
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252}.Debug|x86.ActiveCfg = Debug|Win32
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252}.Debug|x86.Build.0 = Debug|Win32
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252}.Release|x64.ActiveCfg = Release|x64
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252}.Release|x64.Build.0 = Release|x64
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252}.Release|x86.ActiveCfg = Release|Win32
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F1D99D91-E5E1-47B6-B4E2-DB748F255252} = {6BAD8FDC-EA92-4BCB-AC1A-1EF5127DA869}
+	EndGlobalSection
+EndGlobal
