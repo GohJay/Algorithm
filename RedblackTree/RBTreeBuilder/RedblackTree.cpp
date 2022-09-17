@@ -47,7 +47,7 @@ void RedblackTree::InsertNode(Node** tree, Node* node)
 		return;
 	}
 
-	if ((*tree)->_data >= node->_data)
+	if ((*tree)->_data > node->_data)
 	{
 		if ((*tree)->_left == _Nil)
 		{
@@ -57,7 +57,7 @@ void RedblackTree::InsertNode(Node** tree, Node* node)
 		else
 			InsertNode(&(*tree)->_left, node);
 	}
-	else
+	else if ((*tree)->_data < node->_data)
 	{
 		if ((*tree)->_right == _Nil)
 		{
