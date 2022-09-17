@@ -10,7 +10,7 @@
 #define NODE_DIRECTION_LD		NODE_DIRECTION_LL << 7
 #define NODE_DIRECTION_ALL		0xff
 
-JumpPointSearch::JumpPointSearch(bool(*func)(int, int)) : _IsMovableCB(func)
+JumpPointSearch::JumpPointSearch(bool(*func)(int, int)) : _IsMovableCB(func), _objectPool(0, false)
 {
 }
 JumpPointSearch::~JumpPointSearch()
@@ -24,7 +24,7 @@ bool JumpPointSearch::FindPath(int srcX, int srcY, int dstX, int dstY, std::list
 	_destination.yPos = dstY;
 
 	// 시작 노드 생성
-	Node* node = new Node;
+	Node* node = _objectPool.Alloc();
 	node->G = 0.0f;
 	node->H = abs(dstX - srcX) + abs(dstY - srcY);
 	node->F = node->G + node->H;
@@ -42,7 +42,7 @@ bool JumpPointSearch::FindPath(int srcX, int srcY, int dstX, int dstY, std::list
 
 		// 오픈리스트에서 꺼낸 노드를 클로즈리스트로 이동
 		_openList.erase(iter);
-		_closeList.insert(node);
+		_closeList.push_back(node);
 
 		// 노드 좌표가 도착지인지 확인
 		if (node->xPos == dstX && node->yPos == dstY)
@@ -73,13 +73,13 @@ void JumpPointSearch::DestroyList()
 	for (auto iter = _openList.begin(); iter != _openList.end();)
 	{
 		Node* node = *iter;
-		delete node;
+		_objectPool.Free(node);
 		iter = _openList.erase(iter);
 	}
 	for (auto iter = _closeList.begin(); iter != _closeList.end();)
 	{
 		Node* node = *iter;
-		delete node;
+		_objectPool.Free(node);
 		iter = _closeList.erase(iter);
 	}
 }
@@ -163,7 +163,7 @@ void JumpPointSearch::MakeNode(Node * parent, const JumpPoint& point)
 		}
 	}
 
-	Node* node = new Node;
+	Node* node = _objectPool.Alloc();
 	node->G = g;
 	node->H = abs(_destination.xPos - point.xPos) + abs(_destination.yPos - point.yPos);
 	node->F = node->G + node->H;

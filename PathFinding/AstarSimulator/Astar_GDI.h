@@ -64,8 +64,9 @@ private:
 	bool IsMovable(int x, int y);
 private:
 	TRAVLE_STATE _state;
+	Jay::ObjectPool<Node> _objectPool;
 	std::multiset<Node*, Node> _openList;
-	std::multiset<Node*, Node> _closeList;
+	std::list<Node*> _closeList;
 	Node* _traveler;
 	Node* _tracker;
 	IPathFinding* _Astar;

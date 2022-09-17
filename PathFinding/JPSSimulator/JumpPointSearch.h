@@ -1,5 +1,6 @@
 #pragma once
 #include "../Common/IPathFinding.h"
+#include "../Common/ObjectPool.h"
 #include "StraightLine.h"
 #include <functional>
 #include <set>
@@ -50,13 +51,14 @@ private:
 	void OptimizeStraightPath(std::list<Point>& route);
 private:
 	std::function<bool(int, int)> _IsMovableCB;
+	Jay::ObjectPool<Node> _objectPool;
 	std::multiset<Node*, Node> _openList;
-	std::multiset<Node*, Node> _closeList;
+	std::list<Node*> _closeList;
 	Point _destination;
 	StraightLine _bresenham;
 };
 template<typename T>
-JumpPointSearch::JumpPointSearch(bool(T::* mem_func)(int, int), T* obj)
+JumpPointSearch::JumpPointSearch(bool(T::* mem_func)(int, int), T* obj) : _objectPool(0, false)
 {
 	_IsMovableCB = std::bind(mem_func, obj, std::placeholders::_1, std::placeholders::_2);
 }

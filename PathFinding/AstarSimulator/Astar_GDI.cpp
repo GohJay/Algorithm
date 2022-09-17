@@ -2,7 +2,7 @@
 #include "Astar_GDI.h"
 
 Astar_GDI::Astar_GDI(char map[][MAX_WIDTH], int width, int height)
-	: _map(map), _width(width), _height(height), _state(Astar_GDI::DEPARTURE)
+	: _map(map), _width(width), _height(height), _state(Astar_GDI::DEPARTURE), _objectPool(0, false)
 {
 	_Astar = new Astar(&Astar_GDI::IsMovable, this);
 	_hPen[GRID] = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
@@ -47,7 +47,7 @@ bool Astar_GDI::FindPathOnce()
 		DestroyList();
 		{
 			// 시작 노드 생성
-			Node* node = new Node;
+			Node* node = _objectPool.Alloc();
 			node->G = 0.0f;
 			node->H = abs(_destination.xPos - _source.xPos) + abs(_destination.yPos - _source.yPos);
 			node->F = node->G + node->H;
@@ -70,7 +70,7 @@ bool Astar_GDI::FindPathOnce()
 			// 오픈리스트에서 꺼낸 노드를 클로즈리스트로 이동
 			Node* node = *iter;
 			_openList.erase(iter);
-			_closeList.insert(node);
+			_closeList.push_back(node);
 
 			// 노드 좌표가 도착지인지 확인
 			if (node->xPos == _destination.xPos && node->yPos == _destination.yPos)
@@ -295,13 +295,13 @@ void Astar_GDI::DestroyList()
 	for (auto iter = _openList.begin(); iter != _openList.end();)
 	{
 		Node* node = *iter;
-		delete node;
+		_objectPool.Free(node);
 		iter = _openList.erase(iter);
 	}
 	for (auto iter = _closeList.begin(); iter != _closeList.end();)
 	{
 		Node* node = *iter;
-		delete node;
+		_objectPool.Free(node);
 		iter = _closeList.erase(iter);
 	}
 }
@@ -339,7 +339,7 @@ void Astar_GDI::MakeNode(Node* parent, int x, int y, bool diagonal)
 		}
 	}
 	
-	Node* node = new Node;
+	Node* node = _objectPool.Alloc();
 	node->G = g;
 	node->H = abs(_destination.xPos - x) + abs(_destination.yPos - y);
 	node->F = node->G + node->H;

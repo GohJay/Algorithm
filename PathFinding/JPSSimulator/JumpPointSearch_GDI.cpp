@@ -12,7 +12,7 @@
 #define NODE_DIRECTION_ALL		0xff
 
 JumpPointSearch_GDI::JumpPointSearch_GDI(char map[][MAX_WIDTH], int width, int height)
-	: _map(map), _width(width), _height(height), _state(JPS_GDI::DEPARTURE)
+	: _map(map), _width(width), _height(height), _state(JPS_GDI::DEPARTURE), _objectPool(0, false)
 {
 	_JPS = new JPS(&JPS_GDI::IsMovable, this);
 	InitColorTable();
@@ -63,7 +63,7 @@ bool JumpPointSearch_GDI::FindPathOnce()
 		DestroyList();
 		{
 			// 시작 노드 생성
-			Node* node = new Node;
+			Node* node = _objectPool.Alloc();
 			node->G = 0.0f;
 			node->H = abs(_destination.xPos - _source.xPos) + abs(_destination.yPos - _source.yPos);
 			node->F = node->G + node->H;
@@ -87,7 +87,7 @@ bool JumpPointSearch_GDI::FindPathOnce()
 			// 오픈리스트에서 꺼낸 노드를 클로즈리스트로 이동
 			Node* node = *iter;
 			_openList.erase(iter);
-			_closeList.insert(node);
+			_closeList.push_back(node);
 
 			// 노드 좌표가 도착지인지 확인
 			if (node->xPos == _destination.xPos && node->yPos == _destination.yPos)
@@ -391,13 +391,13 @@ void JumpPointSearch_GDI::DestroyList()
 	for (auto iter = _openList.begin(); iter != _openList.end();)
 	{
 		Node* node = *iter;
-		delete node;
+		_objectPool.Free(node);
 		iter = _openList.erase(iter);
 	}
 	for (auto iter = _closeList.begin(); iter != _closeList.end();)
 	{
 		Node* node = *iter;
-		delete node;
+		_objectPool.Free(node);
 		iter = _closeList.erase(iter);
 	}
 	_route.clear();
@@ -483,7 +483,7 @@ void JumpPointSearch_GDI::MakeNode(Node * parent, const JumpPoint& point)
 		}
 	}
 
-	Node* node = new Node;
+	Node* node = _objectPool.Alloc();
 	node->G = g;
 	node->H = abs(_destination.xPos - point.xPos) + abs(_destination.yPos - point.yPos);
 	node->F = node->G + node->H;

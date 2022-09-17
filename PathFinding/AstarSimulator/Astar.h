@@ -1,5 +1,6 @@
 #pragma once
 #include "../Common/IPathFinding.h"
+#include "../Common/ObjectPool.h"
 #include <functional>
 #include <set>
 
@@ -34,12 +35,13 @@ private:
 	bool IsDiagonal(int srcX, int srcY, int dstX, int dstY);
 private:
 	std::function<bool(int, int)> _IsMovableCB;
+	Jay::ObjectPool<Node> _objectPool;
 	std::multiset<Node*, Node> _openList;
-	std::multiset<Node*, Node> _closeList;
+	std::list<Node*> _closeList;
 	Point _destination;
 };
 template<typename T>
-Astar::Astar(bool(T::* mem_func)(int, int), T * obj)
+Astar::Astar(bool(T::* mem_func)(int, int), T * obj) : _objectPool(0, false)
 {
 	_IsMovableCB = std::bind(mem_func, obj, std::placeholders::_1, std::placeholders::_2);
 }

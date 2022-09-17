@@ -1,6 +1,6 @@
 #include "Astar.h"
 
-Astar::Astar(bool(*func)(int, int)) : _IsMovableCB(func)
+Astar::Astar(bool(*func)(int, int)) : _IsMovableCB(func), _objectPool(0, false)
 {
 }
 Astar::~Astar()
@@ -14,7 +14,7 @@ bool Astar::FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& a
 	_destination.yPos = dstY;
 
 	// 시작 노드 생성
-	Node* node = new Node;
+	Node* node = _objectPool.Alloc();
 	node->G = 0.0f;
 	node->H = abs(dstX - srcX) + abs(dstY - srcY);
 	node->F = node->G + node->H;
@@ -31,7 +31,7 @@ bool Astar::FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& a
 
 		// 오픈리스트에서 꺼낸 노드를 클로즈리스트로 이동
 		_openList.erase(iter);
-		_closeList.insert(node);
+		_closeList.push_back(node);
 
 		// 노드 좌표가 도착지인지 확인
 		if (node->xPos == dstX && node->yPos == dstY)
@@ -57,13 +57,13 @@ void Astar::DestroyList()
 	for (auto iter = _openList.begin(); iter != _openList.end();)
 	{
 		Node* node = *iter;
-		delete node;
+		_objectPool.Free(node);
 		iter = _openList.erase(iter);
 	}
 	for (auto iter = _closeList.begin(); iter != _closeList.end();)
 	{
 		Node* node = *iter;
-		delete node;
+		_objectPool.Free(node);
 		iter = _closeList.erase(iter);
 	}
 }
@@ -101,7 +101,7 @@ void Astar::MakeNode(Node * parent, int x, int y, bool diagonal)
 		}
 	}
 
-	Node* node = new Node;
+	Node* node = _objectPool.Alloc();
 	node->G = g;
 	node->H = abs(_destination.xPos - x) + abs(_destination.yPos - y);
 	node->F = node->G + node->H;
