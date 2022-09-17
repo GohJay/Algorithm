@@ -18,5 +18,5 @@ public:
 public:
 	virtual ~IPathFinding() {}
 public:
-	virtual bool FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& answer) = 0;
+	virtual bool FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& route) = 0;
 };

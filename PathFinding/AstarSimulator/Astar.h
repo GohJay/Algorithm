@@ -26,7 +26,7 @@ public:
 	Astar(bool(*func)(int, int));
 	~Astar();
 public:
-	bool FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& answer);
+	bool FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& route);
 private:
 	void DestroyList();
 	void MakeNode(Node* parent, int x, int y, bool diagonal);

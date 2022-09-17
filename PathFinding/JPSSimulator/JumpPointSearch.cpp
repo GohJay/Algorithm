@@ -17,7 +17,7 @@ JumpPointSearch::~JumpPointSearch()
 {
 	DestroyList();
 }
-bool JumpPointSearch::FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& answer)
+bool JumpPointSearch::FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& route)
 {
 	// 길찾기를 위한 초기화 작업 수행
 	_destination.xPos = dstX;
@@ -47,14 +47,20 @@ bool JumpPointSearch::FindPath(int srcX, int srcY, int dstX, int dstY, std::list
 		// 노드 좌표가 도착지인지 확인
 		if (node->xPos == dstX && node->yPos == dstY)
 		{
+			// 찾기 완료한 노선을 리스트에 적재
 			while (node)
 			{
-				answer.emplace_front(node->xPos, node->yPos);
+				route.emplace_front(node->xPos, node->yPos);
 				node = node->parent;
 			}
+			
+			// 직선 경로에 대한 최적화 로직 수행 (브레즌햄 알고리즘 사용)
+			OptimizeStraightPath(route);
+
 			DestroyList();
 			return true;
 		}
+
 		// 노드 좌표가 도착지가 아닐 경우 점프포인트서치 수행
 		JumpProc(node);
 	}
@@ -497,4 +503,39 @@ bool JumpPointSearch::IsDiagonal(int srcX, int srcY, int dstX, int dstY)
 		return true;
 
 	return false;
+}
+void JumpPointSearch::OptimizeStraightPath(std::list<Point> & route)
+{
+	int index = 0;
+	auto iter = route.begin();
+	while (index < route.size() - 2)
+	{
+		auto source = iter;
+		auto way = ++iter;
+		auto dest = ++iter;
+
+		bool straightPath = true;
+		StraightLine::Point point;
+		_bresenham.Line(source->xPos, source->yPos, dest->xPos, dest->yPos);
+		while (_bresenham.GetPoint(&point))
+		{
+			if (!_IsMovableCB(point.xPos, point.yPos))
+			{
+				straightPath = false;
+				break;
+			}
+			_bresenham.NextPoint();
+		}
+
+		if (straightPath)
+		{
+			route.erase(way);
+			iter = source;
+		}
+		else
+		{
+			iter = way;
+			index++;
+		}
+	}
 }

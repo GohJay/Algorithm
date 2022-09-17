@@ -1,5 +1,6 @@
 #pragma once
 #include "JumpPointSearch.h"
+#include "StraightLine.h"
 #include <Windows.h>
 #include <set>
 
@@ -39,7 +40,8 @@ private:
 	enum GDI_PEN
 	{
 		GRID = 0,
-		TRACKING
+		TRACKING,
+		OPTIMIZE
 	};
 	enum GDI_BRUSH
 	{
@@ -80,6 +82,7 @@ private:
 	bool SearchDDCorner(int x, int y, JumpPoint* point);
 	bool SearchLDCorner(int x, int y, JumpPoint* point);
 	bool IsDiagonal(int srcX, int srcY, int dstX, int dstY);
+	void OptimizeStraightPath(std::list<JPS::Point> & route);
 	bool IsMovable(int x, int y);
 private:
 	TRAVEL_STATE _state;
@@ -87,6 +90,8 @@ private:
 	std::multiset<Node*, Node> _closeList;
 	Node* _traveler;
 	Node* _tracker;
+	std::list<JPS::Point> _route;
+	StraightLine _bresenham;
 	IPathFinding* _JPS;
 	IPathFinding::Point _source;
 	IPathFinding::Point _destination;
@@ -97,7 +102,7 @@ private:
 	int _height;
 	char (*_map)[MAX_WIDTH];
 private:
-	HPEN _hPen[2];
+	HPEN _hPen[3];
 	HBRUSH _hBrush[6];
 };
 inline

@@ -40,7 +40,6 @@ void Astar_GDI::SetDestination(int dstX, int dstY)
 }
 bool Astar_GDI::FindPathOnce()
 {
-_ENTRY_POINT:
 	switch (_state)
 	{
 	case Astar_GDI::DEPARTURE:
@@ -104,7 +103,7 @@ _ENTRY_POINT:
 	case Astar_GDI::NOWAY:
 		// 해당 함수가 길찾기 완료 이후 호출 되었으므로 길찾기를 다시 수행한다.
 		_state = Astar_GDI::DEPARTURE;
-		goto _ENTRY_POINT;
+		return FindPathOnce();
 	default:
 		break;
 	}

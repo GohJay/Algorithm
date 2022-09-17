@@ -1,5 +1,6 @@
 #pragma once
 #include "../Common/IPathFinding.h"
+#include "StraightLine.h"
 #include <functional>
 #include <set>
 
@@ -32,7 +33,7 @@ public:
 	JumpPointSearch(bool(*func)(int, int));
 	~JumpPointSearch();
 public:
-	bool FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& answer);
+	bool FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& route);
 private:
 	void DestroyList();
 	void JumpProc(Node* node);
@@ -46,11 +47,13 @@ private:
 	bool SearchDDCorner(int x, int y, JumpPoint* point);
 	bool SearchLDCorner(int x, int y, JumpPoint* point);
 	bool IsDiagonal(int srcX, int srcY, int dstX, int dstY);
+	void OptimizeStraightPath(std::list<Point>& route);
 private:
 	std::function<bool(int, int)> _IsMovableCB;
 	std::multiset<Node*, Node> _openList;
 	std::multiset<Node*, Node> _closeList;
 	Point _destination;
+	StraightLine _bresenham;
 };
 template<typename T>
 JumpPointSearch::JumpPointSearch(bool(T::* mem_func)(int, int), T* obj)

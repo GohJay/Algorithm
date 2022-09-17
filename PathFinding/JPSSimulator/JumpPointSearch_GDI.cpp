@@ -19,6 +19,7 @@ JumpPointSearch_GDI::JumpPointSearch_GDI(char map[][MAX_WIDTH], int width, int h
 	InitColorMap();
 	_hPen[GRID] = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
 	_hPen[TRAVLING] = CreatePen(PS_SOLID, 2, RGB(0, 255, 0));
+	_hPen[OPTIMIZE] = CreatePen(PS_SOLID, 2, RGB(255, 215, 0));
 	_hBrush[OBSTACLE] = CreateSolidBrush(RGB(100, 100, 100));
 	_hBrush[SOURCE] = CreateSolidBrush(RGB(0, 0, 255));
 	_hBrush[DEST] = CreateSolidBrush(RGB(255, 0, 0));
@@ -54,7 +55,6 @@ void JumpPointSearch_GDI::SetDestination(int dstX, int dstY)
 }
 bool JumpPointSearch_GDI::FindPathOnce()
 {
-_ENTRY_POINT:
 	switch (_state)
 	{
 	case JPS_GDI::DEPARTURE:
@@ -92,21 +92,37 @@ _ENTRY_POINT:
 			// 노드 좌표가 도착지인지 확인
 			if (node->xPos == _destination.xPos && node->yPos == _destination.yPos)
 			{
+				_tracker = node;
+
+				// 찾기 완료한 노선을 리스트에 적재
+				while (node)
+				{
+					_route.emplace_front(node->xPos, node->yPos);
+					node = node->parent;
+				}
+
+				// 직선 경로에 대한 최적화 로직 수행 (브레즌햄 알고리즘 사용)
+				OptimizeStraightPath(_route);
+
 				// 노드 좌표가 도착지일 경우 한번 더 검증한다. (GDI 기능을 제거한 JPS 알고리즘 함수를 수행하여 검증)
 				std::list<JPS::Point> answer;
 				if (!_JPS->FindPath(_source.xPos, _source.yPos, _destination.xPos, _destination.yPos, answer))
+					throw;	
+
+				if (_route.size() != answer.size())
 					throw;
 
-				_tracker = node;
-				while (node)
+				auto iter1 = _route.begin();
+				auto iter2 = answer.begin();
+				while (iter1 != _route.end() && iter2 != answer.end())
 				{
-					JPS::Point point = answer.back();
-					if (node->xPos != point.xPos || node->yPos != point.yPos)
+					if (iter1->xPos != iter2->xPos || iter1->yPos != iter2->yPos)
 						throw;
-
-					answer.pop_back();
-					node = node->parent;
+					
+					++iter1;
+					++iter2;
 				}
+
 				_state = JPS_GDI::ARRIVAL;
 				return true;
 			}
@@ -120,7 +136,7 @@ _ENTRY_POINT:
 	case JPS_GDI::NOWAY:
 		// 해당 함수가 길찾기 완료 이후 호출 되었으므로 길찾기를 다시 수행한다.
 		_state = JPS_GDI::DEPARTURE;
-		goto _ENTRY_POINT;
+		return FindPathOnce();
 	default:
 		break;
 	}
@@ -284,7 +300,22 @@ void JumpPointSearch_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, I
 		break;
 	case JPS_GDI::ARRIVAL:
 		{
-			// 찾기 완료한 노드와 해당 노드의 부모를 선으로 이어준다.
+			// 직선 경로가 최적화된 노선을 그린다.
+			HPEN hOldPen = (HPEN)SelectObject(hdc, _hPen[OPTIMIZE]);
+			int index = 0;
+			auto iter = _route.begin();
+			while (index < _route.size() - 1)
+			{
+				auto source = iter;
+				auto dest = ++iter;
+				MoveToEx(hdc, ((source->xPos - screanX) * scale) + (scale / 2), ((source->yPos - screanY) * scale) + (scale / 2), NULL);
+				LineTo(hdc, ((dest->xPos - screanX) * scale) + (scale / 2), ((dest->yPos - screanY) * scale) + (scale / 2));
+				index++;
+			}
+			SelectObject(hdc, hOldPen);
+		}
+		{
+			// 직선 경로가 최적화되지 않은 노선을 그린다.
 			HPEN hOldPen = (HPEN)SelectObject(hdc, _hPen[TRACKING]);
 			Node* node = _tracker;
 			for (;;)
@@ -369,6 +400,7 @@ void JumpPointSearch_GDI::DestroyList()
 		delete node;
 		iter = _closeList.erase(iter);
 	}
+	_route.clear();
 }
 void JumpPointSearch_GDI::JumpProc(Node * node)
 {
@@ -814,4 +846,39 @@ bool JumpPointSearch_GDI::IsDiagonal(int srcX, int srcY, int dstX, int dstY)
 		return true;
 
 	return false;
+}
+void JumpPointSearch_GDI::OptimizeStraightPath(std::list<JPS::Point> & route)
+{
+	int index = 0;
+	auto iter = route.begin();
+	while (index < route.size() - 2)
+	{
+		auto source = iter;
+		auto way = ++iter;
+		auto dest = ++iter;
+
+		bool straightPath = true;
+		StraightLine::Point point;
+		_bresenham.Line(source->xPos, source->yPos, dest->xPos, dest->yPos);
+		while (_bresenham.GetPoint(&point))
+		{
+			if (!IsMovable(point.xPos, point.yPos))
+			{
+				straightPath = false;
+				break;
+			}
+			_bresenham.NextPoint();
+		}
+
+		if (straightPath)
+		{
+			route.erase(way);
+			iter = source;
+		}
+		else
+		{
+			iter = way;
+			index++;
+		}
+	}
 }

@@ -3,7 +3,7 @@
 #include "Astar_GDI.h"
 #include <windowsx.h>
 
-#define NAME_TITLE		L"Title"
+#define NAME_TITLE		L"AstarSimulator"
 #define NAME_CLASS		L"Class"
 #define GRID_WIDTH		62
 #define GRID_HEIGHT		32
@@ -139,14 +139,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int iTileX = (xPos / g_Scale) + g_ScreenX;
 			int iTileY = (yPos / g_Scale) + g_ScreenY;
 
-			// 첫 선택 타일이 장애물이면 지우기 모드
-			// 첫 선택 타일이 장애물이 아니면 장애물 넣기 모드
-			if (!g_bCtrl)
-				g_bErase = g_Map[iTileY][iTileX] == TRUE;
-			else
+			if (g_bCtrl)
 			{
+				// 스크린 좌표 갱신을 위한 좌표 값 저장
 				g_xPos = xPos;
 				g_yPos = yPos;
+			}
+			else
+			{
+				// 첫 선택 타일이 장애물이면 지우기 모드
+				// 첫 선택 타일이 장애물이 아니면 장애물 넣기 모드
+				g_bErase = g_Map[iTileY][iTileX] == TRUE;
 			}
 			g_bDrag = TRUE;
 		}
@@ -163,10 +166,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			if (g_bDrag)
 			{
-				if (!g_bCtrl)
-					g_Map[iTileY][iTileX] = !g_bErase;
-				else
+				if (g_bCtrl)
 				{
+					// 스크린 좌표 갱신
 					int iDeltaX = ((xPos - g_xPos) / g_Scale) + g_ScreenX;
 					int iDeltaY = ((yPos - g_yPos) / g_Scale) + g_ScreenY;
 					if (iDeltaX < g_ScreenX && g_ScreenX < GRID_WIDTH)
@@ -190,6 +192,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						g_yPos = yPos;
 					}
 				}
+				else
+				{
+					// 장애물 넣기 또는 지우기
+					g_Map[iTileY][iTileX] = !g_bErase;
+				}
 				InvalidateRect(hWnd, NULL, false);
 			}
 		}
@@ -200,8 +207,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int yPos = GET_Y_LPARAM(lParam);
 			int iTileX = (xPos / g_Scale) + g_ScreenX;
 			int iTileY = (yPos / g_Scale) + g_ScreenY;
+
+			// 클릭한 타일에 장애물이 없을 경우
 			if (!g_Map[iTileY][iTileX])
 			{
+				// 길찾기 출발지 등록
 				g_Astar.SetSource(iTileX, iTileY);
 				InvalidateRect(hWnd, NULL, false);
 			}
@@ -213,20 +223,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int yPos = GET_Y_LPARAM(lParam);
 			int iTileX = (xPos / g_Scale) + g_ScreenX;
 			int iTileY = (yPos / g_Scale) + g_ScreenY;
+
+			// 클릭한 타일에 장애물이 없을 경우
 			if (!g_Map[iTileY][iTileX])
 			{
+				// 길찾기 도착지 등록
 				g_Astar.SetDestination(iTileX, iTileY);
 				InvalidateRect(hWnd, NULL, false);
 			}
 		}
 		break; 
 	case WM_MBUTTONUP:
-		SetTimer(hWnd, 1, 10, NULL);
+		SetTimer(hWnd, 1, 10, NULL);	// 길찾기 시작
 		SendMessage(hWnd, WM_TIMER, 1, NULL);
 		break;
 	case WM_MOUSEWHEEL:
 		if (g_bCtrl)
 		{
+			// 타일 스케일 및 스크린 좌표 갱신
 			if ((SHORT)HIWORD(wParam) > 0)
 			{
 				if (g_Scale <= SCALE_MAX - SCALE_UNIT)
@@ -258,7 +272,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case 1:
 			if (g_Astar.FindPathOnce())
-				KillTimer(hWnd, 1);
+				KillTimer(hWnd, 1);		// 길찾기 종료
 			InvalidateRect(hWnd, NULL, false);
 			break;
 		default:
@@ -267,11 +281,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		{
+			// 랜더링
 			PatBlt(g_hMemDC, 0, 0, g_MemDCRect.right, g_MemDCRect.bottom, WHITENESS);
 			SetBkMode(g_hMemDC, TRANSPARENT);
 			g_Astar.Render(g_hMemDC, g_ScreenX, g_ScreenY, g_Scale);
-			
-			// Double Buffering
+
+			// 더블버퍼링
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint(hWnd, &ps);
 			BitBlt(hdc, 0, 0, g_MemDCRect.right, g_MemDCRect.bottom, g_hMemDC, 0, 0, SRCCOPY);
