@@ -130,12 +130,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
-		case IDM_ERASE:
+		case IDM_ERASEALL:
 			memset(g_Map, 0, sizeof(g_Map));
-			g_JPS.Cleanup();
 			g_StraightPath.clear();
+			g_JPS.Cleanup();
 			InvalidateRect(hWnd, NULL, false);
 			break; 
+		case IDM_ERASEOBSTACLE:
+			memset(g_Map, 0, sizeof(g_Map));
+			InvalidateRect(hWnd, NULL, false);
+			break;
+		case IDM_ERASESTRAIGHT:
+			g_StraightPath.clear();
+			InvalidateRect(hWnd, NULL, false);
+			break;
 		default:
 			break;
 		}

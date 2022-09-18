@@ -23,7 +23,5 @@ public:
 	void NextPoint();
 	bool GetPoint(Point* point);
 private:
-
-private:
 	std::list<Point> route;
 };
