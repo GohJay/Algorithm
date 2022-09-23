@@ -127,11 +127,14 @@ void RedblackTree::DestroyTree(Node* tree)
 }
 void RedblackTree::RebuildAfterInsert(Node * node)
 {
+	// 규칙을 위배하는 동안에는 루프를 반복한다.
 	while (node != _root && node->_parent->_color == Node::COLOR::RED)
 	{
+		// 부모 노드가 할아버지 노드의 왼쪽 자식일 경우
 		if (node->_parent == node->_parent->_parent->_left)
 		{
 			Node* uncle = node->_parent->_parent->_right;
+			// 삼촌이 레드인 경우
 			if (uncle->_color == Node::COLOR::RED)
 			{
 				node->_parent->_color = Node::COLOR::BLACK;
@@ -141,6 +144,7 @@ void RedblackTree::RebuildAfterInsert(Node * node)
 			}
 			else
 			{
+				// 삼촌이 블랙이면서 node 가 부모의 오른쪽 자식일 때
 				if (node == node->_parent->_right)
 				{
 					node = node->_parent;
@@ -154,6 +158,7 @@ void RedblackTree::RebuildAfterInsert(Node * node)
 		else
 		{
 			Node* uncle = node->_parent->_parent->_left;
+			// 삼촌이 레드인 경우
 			if (uncle->_color == Node::COLOR::RED)
 			{
 				node->_parent->_color = Node::COLOR::BLACK;
@@ -163,6 +168,7 @@ void RedblackTree::RebuildAfterInsert(Node * node)
 			}
 			else
 			{
+				// 삼촌이 블랙이면서 node 가 부모의 왼쪽 자식일 때
 				if (node == node->_parent->_left)
 				{
 					node = node->_parent;
@@ -174,16 +180,19 @@ void RedblackTree::RebuildAfterInsert(Node * node)
 			}
 		}
 	}
+	// 루트 노드는 반드시 블랙이어야 한다.
 	_root->_color = Node::COLOR::BLACK;
 }
 void RedblackTree::RebuildAfterRemove(Node * node)
 {
 	Node* sibling;
+	// 루트 노드가 되거나 레드 노드한테 블랙이 넘어가면 루프 종료
 	while (node->_parent != _Nil && node->_color == Node::COLOR::BLACK)
 	{
 		if (node == node->_parent->_left)
 		{
 			sibling = node->_parent->_right;
+			// 형제가 레드인 경우
 			if (sibling->_color == Node::COLOR::RED)
 			{
 				sibling->_color = Node::COLOR::BLACK;
@@ -192,6 +201,7 @@ void RedblackTree::RebuildAfterRemove(Node * node)
 			}
 			else
 			{
+				// 양쪽 자식이 모두 블랙인 경우
 				if (sibling->_left->_color == Node::COLOR::BLACK &&
 					sibling->_right->_color == Node::COLOR::BLACK)
 				{
@@ -200,6 +210,7 @@ void RedblackTree::RebuildAfterRemove(Node * node)
 				}
 				else
 				{
+					// 왼쪽 자식이 레드인 경우
 					if (sibling->_left->_color == Node::COLOR::RED)
 					{
 						sibling->_left->_color = Node::COLOR::BLACK;
@@ -207,6 +218,7 @@ void RedblackTree::RebuildAfterRemove(Node * node)
 						RotateRight(sibling);
 						sibling = node->_parent->_right;
 					}
+					// 오른쪽 자식이 레드인 경우
 					sibling->_color = node->_parent->_color;
 					sibling->_parent->_color = Node::COLOR::BLACK;
 					sibling->_right->_color = Node::COLOR::BLACK;
@@ -218,6 +230,7 @@ void RedblackTree::RebuildAfterRemove(Node * node)
 		else
 		{
 			sibling = node->_parent->_left;
+			// 형제가 레드인 경우
 			if (sibling->_color == Node::COLOR::RED)
 			{
 				sibling->_color = Node::COLOR::BLACK;
@@ -226,6 +239,7 @@ void RedblackTree::RebuildAfterRemove(Node * node)
 			}
 			else
 			{
+				// 양쪽 자식이 모두 블랙인 경우
 				if (sibling->_right->_color == Node::COLOR::BLACK &&
 					sibling->_left->_color == Node::COLOR::BLACK)
 				{
@@ -234,6 +248,7 @@ void RedblackTree::RebuildAfterRemove(Node * node)
 				}
 				else
 				{
+					// 오른쪽 자식이 레드인 경우
 					if (sibling->_right->_color == Node::COLOR::RED)
 					{
 						sibling->_right->_color = Node::COLOR::BLACK;
@@ -242,7 +257,7 @@ void RedblackTree::RebuildAfterRemove(Node * node)
 						RotateLeft(sibling);
 						sibling = node->_parent->_left;
 					}
-
+					// 왼쪽 자식이 레드인 경우
 					sibling->_color = node->_parent->_color;
 					node->_parent->_color = Node::COLOR::BLACK;
 					sibling->_left->_color = Node::COLOR::BLACK;
