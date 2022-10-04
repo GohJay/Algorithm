@@ -10,21 +10,27 @@ RedblackTree::~RedblackTree()
 	DestroyTree(_root);
 	delete _Nil;
 }
-void RedblackTree::Insert(int data)
+bool RedblackTree::Insert(int data)
 {
-	Node* newNode = new Node(data, _Nil, _Nil, _Nil, Node::COLOR::RED);
-	InsertNode(&_root, newNode);
-	RebuildAfterInsert(newNode);
-	_count++;
+	Node* newNode = InsertNode(&_root, data);
+	if (newNode)
+	{
+		RebuildAfterInsert(newNode);
+		_count++;
+		return true;
+	}
+	return false;
 }
-void RedblackTree::Remove(int data)
+bool RedblackTree::Remove(int data)
 {
 	Node* delNode = RemoveNode(&_root, data);
 	if (delNode)
 	{
 		delete delNode;
 		_count--;
+		return true;
 	}
+	return false;
 }
 void RedblackTree::RemoveAll()
 {
@@ -39,34 +45,39 @@ int RedblackTree::size()
 {
 	return _count;
 }
-void RedblackTree::InsertNode(Node** tree, Node* node)
+RedblackTree::Node* RedblackTree::InsertNode(Node** tree, int data)
 {
+	Node* node;
 	if (*tree == _Nil)
 	{
+		node = new Node(data, _Nil, _Nil, _Nil, Node::COLOR::RED);
 		*tree = node;
-		return;
+		return node;
 	}
 
-	if ((*tree)->_data > node->_data)
+	if ((*tree)->_data > data)
 	{
 		if ((*tree)->_left == _Nil)
 		{
-			node->_parent = *tree;
+			node = new Node(data, *tree, _Nil, _Nil, Node::COLOR::RED);
 			(*tree)->_left = node;
+			return node;
 		}
 		else
-			InsertNode(&(*tree)->_left, node);
+			return InsertNode(&(*tree)->_left, data);
 	}
-	else if ((*tree)->_data < node->_data)
+	else if ((*tree)->_data < data)
 	{
 		if ((*tree)->_right == _Nil)
 		{
-			node->_parent = *tree;
+			node = new Node(data, *tree, _Nil, _Nil, Node::COLOR::RED);
 			(*tree)->_right = node;
+			return node;
 		}
 		else
-			InsertNode(&(*tree)->_right, node);
+			return InsertNode(&(*tree)->_right, data);
 	}
+	return nullptr;
 }
 RedblackTree::Node* RedblackTree::RemoveNode(Node** tree, int data)
 {

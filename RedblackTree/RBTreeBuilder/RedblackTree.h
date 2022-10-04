@@ -25,13 +25,13 @@ public:
 	RedblackTree();
 	~RedblackTree();
 public:
-	void Insert(int data);
-	void Remove(int data);
+	bool Insert(int data);
+	bool Remove(int data);
 	void RemoveAll();
 	void Draw(HDC hdc, int x, int y);
 	int size();
 private:
-	void InsertNode(Node** tree, Node* node);
+	Node* InsertNode(Node** tree, int node);
 	Node* RemoveNode(Node** tree, int data);
 	void DestroyTree(Node* tree);
 	void RebuildAfterInsert(Node* node);
