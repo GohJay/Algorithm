@@ -452,9 +452,14 @@ void JumpPointSearch_GDI::MakeNode(Node * parent, const JumpPoint& point)
 {
 	float g = parent->G;
 	if (IsDiagonal(parent->xPos, parent->yPos, point.xPos, point.yPos))
-		g += 1.5f;
+		g += abs(point.xPos - parent->xPos) * 1.5f;
 	else
-		g += 1.0f;
+	{
+		if (parent->xPos == point.xPos)
+			g += abs(point.yPos - parent->yPos) * 1.0f;
+		else
+			g += abs(point.xPos - parent->xPos) * 1.0f;
+	}
 	
 	for (auto iter = _closeList.begin(); iter != _closeList.end(); ++iter)
 	{

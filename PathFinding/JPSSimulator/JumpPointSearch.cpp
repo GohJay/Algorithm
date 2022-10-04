@@ -132,9 +132,14 @@ void JumpPointSearch::MakeNode(Node * parent, const JumpPoint& point)
 {
 	float g = parent->G;
 	if (IsDiagonal(parent->xPos, parent->yPos, point.xPos, point.yPos))
-		g += 1.5f;
+		g += abs(point.xPos - parent->xPos) * 1.5f;
 	else
-		g += 1.0f;
+	{
+		if (parent->xPos == point.xPos)
+			g += abs(point.yPos - parent->yPos) * 1.0f;
+		else
+			g += abs(point.xPos - parent->xPos) * 1.0f;
+	}
 
 	// 생성하려는 노드가 클로즈리스트에 이미 존재할 경우 방문했던 타일이므로 생성하지 않고 나간다.
 	for (auto iter = _closeList.begin(); iter != _closeList.end(); ++iter)
