@@ -95,7 +95,7 @@ RedblackTree::Node* RedblackTree::RemoveNode(Node** tree, int data)
 			// 자식이 양쪽 다 있는 경우
 			Node* min = SearchMinNode((*tree)->_right);
 			(*tree)->_data = min->_data;
-			return RemoveNode(&(*tree)->_right, min->_data);
+			return RemoveNode(&min, min->_data);
 		}
 		else
 		{
