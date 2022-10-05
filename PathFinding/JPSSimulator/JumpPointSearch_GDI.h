@@ -65,6 +65,7 @@ private:
 	void RenderGrid(HDC hdc, INT screanX, INT screanY, INT scale);
 	void RenderObstacle(HDC hdc, INT screanX, INT screanY, INT scale);
 	void RenderPathfinding(HDC hdc, INT screanX, INT screanY, INT scale);
+	void RenderNodeInfo(HDC hdc, INT screanX, INT screanY, INT scale, Node* node);
 	void RenderTileColor(HDC hdc, INT screanX, INT screanY, INT scale);
 	void InitColorTable();
 	void InitColorMap();

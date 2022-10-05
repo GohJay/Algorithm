@@ -216,18 +216,8 @@ void JumpPointSearch_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, I
 			iY = (node->yPos - screanY) * scale;
 			Rectangle(hdc, iX, iY, iX + scale + 2, iY + scale + 2);
 
-			if (scale >= 80)
-			{
-				char data[32];
-				sprintf_s(data, "G: %.1f", node->G);
-				TextOutA(hdc, iX + 5, iY + 5, data, strlen(data));
-				sprintf_s(data, "H: %.1f", node->H);
-				TextOutA(hdc, iX + 5, iY + 25, data, strlen(data));
-				sprintf_s(data, "F: %.1f", node->F);
-				TextOutA(hdc, iX + 5, iY + 45, data, strlen(data));
-				sprintf_s(data, "X: %d, Y: %d", node->xPos, node->yPos);
-				TextOutA(hdc, iX + 5, iY + 65, data, strlen(data));
-			}
+			if (scale >= 100)
+				RenderNodeInfo(hdc, screanX, screanY, scale, node);
 		}
 		SelectObject(hdc, hOldBrush);
 	}
@@ -246,18 +236,8 @@ void JumpPointSearch_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, I
 			iY = (node->yPos - screanY) * scale;
 			Rectangle(hdc, iX, iY, iX + scale + 2, iY + scale + 2);
 
-			if (scale >= 80)
-			{
-				char data[32];
-				sprintf_s(data, "G: %.1f", node->G);
-				TextOutA(hdc, iX + 5, iY + 5, data, strlen(data));
-				sprintf_s(data, "H: %.1f", node->H);
-				TextOutA(hdc, iX + 5, iY + 25, data, strlen(data));
-				sprintf_s(data, "F: %.1f", node->F);
-				TextOutA(hdc, iX + 5, iY + 45, data, strlen(data));
-				sprintf_s(data, "X: %d, Y: %d", node->xPos, node->yPos);
-				TextOutA(hdc, iX + 5, iY + 65, data, strlen(data));
-			}
+			if (scale >= 100)
+				RenderNodeInfo(hdc, screanX, screanY, scale, node);
 		}
 		SelectObject(hdc, hOldBrush);
 	}
@@ -337,6 +317,65 @@ void JumpPointSearch_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, I
 		break;
 	default:
 		break;
+	}
+}
+void JumpPointSearch_GDI::RenderNodeInfo(HDC hdc, INT screanX, INT screanY, INT scale, Node* node)
+{
+	int iX = (node->xPos - screanX) * scale;
+	int iY = (node->yPos - screanY) * scale;
+
+	// 휴리스틱 정보 출력
+	wchar_t heuristic[32];
+	swprintf_s(heuristic, L"G: %.1f", node->G);
+	TextOut(hdc, iX + 5, iY + 5, heuristic, wcslen(heuristic));
+	swprintf_s(heuristic, L"H: %.1f", node->H);
+	TextOut(hdc, iX + 5, iY + 25, heuristic, wcslen(heuristic));
+	swprintf_s(heuristic, L"F: %.1f", node->F);
+	TextOut(hdc, iX + 5, iY + 45, heuristic, wcslen(heuristic));
+	swprintf_s(heuristic, L"X: %d, Y: %d", node->xPos, node->yPos);
+	TextOut(hdc, iX + 5, iY + 65, heuristic, wcslen(heuristic));
+
+	// 방향(Direction) 정보 출력
+	wchar_t direction;
+	if (node->direction & NODE_DIRECTION_LL)
+	{		
+		direction = L'←';
+		TextOut(hdc, iX + 5, iY + 85, &direction, 1);
+	}
+	if (node->direction & NODE_DIRECTION_LU)
+	{
+		direction = L'↖';
+		TextOut(hdc, iX + 5, iY + 85, &direction, 1);
+	}
+	if (node->direction & NODE_DIRECTION_UU)
+	{
+		direction = L'↑';
+		TextOut(hdc, iX + 5, iY + 85, &direction, 1);
+	}
+	if (node->direction & NODE_DIRECTION_RU)
+	{
+		direction = L'↗';
+		TextOut(hdc, iX + 5, iY + 85, &direction, 1);
+	}
+	if (node->direction & NODE_DIRECTION_RR)
+	{
+		direction = L'→';
+		TextOut(hdc, iX + 5, iY + 85, &direction, 1);
+	}
+	if (node->direction & NODE_DIRECTION_RD)
+	{
+		direction = L'↘';
+		TextOut(hdc, iX + 5, iY + 85, &direction, 1);
+	}
+	if (node->direction & NODE_DIRECTION_DD)
+	{
+		direction = L'↓';
+		TextOut(hdc, iX + 5, iY + 85, &direction, 1);
+	}
+	if (node->direction & NODE_DIRECTION_LD)
+	{
+		direction = L'↙';
+		TextOut(hdc, iX + 5, iY + 85, &direction, 1);
 	}
 }
 void JumpPointSearch_GDI::RenderTileColor(HDC hdc, INT screanX, INT screanY, INT scale)
