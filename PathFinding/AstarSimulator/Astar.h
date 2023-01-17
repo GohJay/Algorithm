@@ -31,10 +31,15 @@ private:
 	void MakeNode(NODE* parent, int x, int y, bool diagonal);
 	void MakeEightDirectionNode(NODE* parent);
 	bool IsDiagonal(int srcX, int srcY, int dstX, int dstY);
+	bool IsMovable(int, int);
 private:
-	std::function<bool(int, int)> _IsMovableCB;
+	std::function<bool(int, int)> _callback;
 	Jay::ObjectPool<NODE> _objectPool;
 	std::multiset<NODE*, NODE> _openList;
 	std::list<NODE*> _closeList;
 	Point _destination;
 };
+inline bool Astar::IsMovable(int x, int y)
+{
+	return _callback(x, y);
+}

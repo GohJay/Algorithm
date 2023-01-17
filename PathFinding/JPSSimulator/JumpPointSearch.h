@@ -46,13 +46,18 @@ private:
 	bool SearchDDCorner(int x, int y, JumpPoint* point);
 	bool SearchLDCorner(int x, int y, JumpPoint* point);
 	bool IsDiagonal(int srcX, int srcY, int dstX, int dstY);
+	bool IsMovable(int x, int y);
 	void OptimizeStraightPath(std::list<Point>& route);
 private:
-	std::function<bool(int, int)> _IsMovableCB;
+	std::function<bool(int, int)> _callback;
 	Jay::ObjectPool<NODE> _objectPool;
 	std::multiset<NODE*, NODE> _openList;
 	std::list<NODE*> _closeList;
 	Point _destination;
 	StraightLine _bresenham;
 };
+inline bool JumpPointSearch::IsMovable(int x, int y)
+{
+	return _callback(x, y);
+}
 typedef JumpPointSearch JPS;

@@ -10,7 +10,7 @@
 #define NODE_DIRECTION_LD		NODE_DIRECTION_LL << 7
 #define NODE_DIRECTION_ALL		0xff
 
-JumpPointSearch::JumpPointSearch(std::function<bool(int, int)> callback) : _IsMovableCB(callback), _objectPool(0, false)
+JumpPointSearch::JumpPointSearch(std::function<bool(int, int)> callback) : _callback(callback), _objectPool(0, false)
 {
 }
 JumpPointSearch::~JumpPointSearch()
@@ -181,7 +181,7 @@ void JumpPointSearch::MakeNode(NODE * parent, const JumpPoint& point)
 bool JumpPointSearch::SearchLLCorner(int x, int y, JumpPoint* point)
 {
 	// 방문한 타일이 이동 가능한 좌표인지 확인한다.
-	while (_IsMovableCB(x, y))
+	while (IsMovable(x, y))
 	{
 		unsigned char direction = NODE_DIRECTION_LL;
 
@@ -195,11 +195,11 @@ bool JumpPointSearch::SearchLLCorner(int x, int y, JumpPoint* point)
 		}
 		
 		// LL 방향의 좌상측 코너를 확인한다.
-		if (!_IsMovableCB(x, y - 1) && _IsMovableCB(x - 1, y - 1))
+		if (!IsMovable(x, y - 1) && IsMovable(x - 1, y - 1))
 			direction |= NODE_DIRECTION_LU;
 
 		// LL 방향의 좌하측 코너를 확인한다.
-		if (!_IsMovableCB(x, y + 1) && _IsMovableCB(x - 1, y + 1))
+		if (!IsMovable(x, y + 1) && IsMovable(x - 1, y + 1))
 			direction |= NODE_DIRECTION_LD;
 
 		if (direction > NODE_DIRECTION_LL)
@@ -217,7 +217,7 @@ bool JumpPointSearch::SearchLLCorner(int x, int y, JumpPoint* point)
 bool JumpPointSearch::SearchLUCorner(int x, int y, JumpPoint* point)
 {
 	// 방문한 타일이 이동 가능한 좌표인지 확인한다.
-	while (_IsMovableCB(x, y))
+	while (IsMovable(x, y))
 	{
 		unsigned char direction = NODE_DIRECTION_LU;
 
@@ -231,11 +231,11 @@ bool JumpPointSearch::SearchLUCorner(int x, int y, JumpPoint* point)
 		}
 		
 		// LU 방향의 우상측 코너를 확인한다.
-		if (!_IsMovableCB(x + 1, y) && _IsMovableCB(x + 1, y - 1))
+		if (!IsMovable(x + 1, y) && IsMovable(x + 1, y - 1))
 			direction |= NODE_DIRECTION_RU;
 
 		// LU 방향의 좌하측 코너를 확인한다.
-		if (!_IsMovableCB(x, y + 1) && _IsMovableCB(x - 1, y + 1))
+		if (!IsMovable(x, y + 1) && IsMovable(x - 1, y + 1))
 			direction |= NODE_DIRECTION_LD;
 
 		// LU 방향의 상측 코너를 탐색한다.
@@ -262,7 +262,7 @@ bool JumpPointSearch::SearchLUCorner(int x, int y, JumpPoint* point)
 bool JumpPointSearch::SearchUUCorner(int x, int y, JumpPoint* point)
 {
 	// 방문한 타일이 이동 가능한 좌표인지 확인한다.
-	while (_IsMovableCB(x, y))
+	while (IsMovable(x, y))
 	{
 		unsigned char direction = NODE_DIRECTION_UU;
 
@@ -276,11 +276,11 @@ bool JumpPointSearch::SearchUUCorner(int x, int y, JumpPoint* point)
 		}
 		
 		// UU 방향의 좌상측 코너를 확인한다.
-		if (!_IsMovableCB(x - 1, y) && _IsMovableCB(x - 1, y - 1))
+		if (!IsMovable(x - 1, y) && IsMovable(x - 1, y - 1))
 			direction |= NODE_DIRECTION_LU;
 
 		// UU 방향의 우상측 코너를 확인한다.
-		if (!_IsMovableCB(x + 1, y) && _IsMovableCB(x + 1, y - 1))
+		if (!IsMovable(x + 1, y) && IsMovable(x + 1, y - 1))
 			direction |= NODE_DIRECTION_RU;
 
 		if (direction > NODE_DIRECTION_UU)
@@ -298,7 +298,7 @@ bool JumpPointSearch::SearchUUCorner(int x, int y, JumpPoint* point)
 bool JumpPointSearch::SearchRUCorner(int x, int y, JumpPoint* point)
 {
 	// 방문한 타일이 이동 가능한 좌표인지 확인한다.
-	while (_IsMovableCB(x, y))
+	while (IsMovable(x, y))
 	{
 		unsigned char direction = NODE_DIRECTION_RU;
 
@@ -312,11 +312,11 @@ bool JumpPointSearch::SearchRUCorner(int x, int y, JumpPoint* point)
 		}
 
 		// RU 방향의 좌상측 코너를 확인한다.
-		if (!_IsMovableCB(x - 1, y) && _IsMovableCB(x - 1, y - 1))
+		if (!IsMovable(x - 1, y) && IsMovable(x - 1, y - 1))
 			direction |= NODE_DIRECTION_LU;
 
 		// RU 방향의 우하측 코너를 확인한다.
-		if (!_IsMovableCB(x, y + 1) && _IsMovableCB(x + 1, y + 1))
+		if (!IsMovable(x, y + 1) && IsMovable(x + 1, y + 1))
 			direction |= NODE_DIRECTION_RD;
 
 		// RU 방향의 상측 코너를 탐색한다.
@@ -343,7 +343,7 @@ bool JumpPointSearch::SearchRUCorner(int x, int y, JumpPoint* point)
 bool JumpPointSearch::SearchRRCorner(int x, int y, JumpPoint* point)
 {
 	// 방문한 타일이 이동 가능한 좌표인지 확인한다.
-	while (_IsMovableCB(x, y))
+	while (IsMovable(x, y))
 	{
 		unsigned char direction = NODE_DIRECTION_RR;
 
@@ -357,11 +357,11 @@ bool JumpPointSearch::SearchRRCorner(int x, int y, JumpPoint* point)
 		}
 
 		// RR 방향의 우상측 코너를 확인한다.
-		if (!_IsMovableCB(x, y - 1) && _IsMovableCB(x + 1, y - 1))
+		if (!IsMovable(x, y - 1) && IsMovable(x + 1, y - 1))
 			direction |= NODE_DIRECTION_RU;
 
 		// RR 방향의 우하측 코너를 확인한다.
-		if (!_IsMovableCB(x, y + 1) && _IsMovableCB(x + 1, y + 1))
+		if (!IsMovable(x, y + 1) && IsMovable(x + 1, y + 1))
 			direction |= NODE_DIRECTION_RD;
 
 		if (direction > NODE_DIRECTION_RR)
@@ -379,7 +379,7 @@ bool JumpPointSearch::SearchRRCorner(int x, int y, JumpPoint* point)
 bool JumpPointSearch::SearchRDCorner(int x, int y, JumpPoint* point)
 {
 	// 방문한 타일이 이동 가능한 좌표인지 확인한다.
-	while (_IsMovableCB(x, y))
+	while (IsMovable(x, y))
 	{
 		unsigned char direction = NODE_DIRECTION_RD;
 
@@ -393,11 +393,11 @@ bool JumpPointSearch::SearchRDCorner(int x, int y, JumpPoint* point)
 		}
 
 		// RD 방향의 우상측 코너를 확인한다.
-		if (!_IsMovableCB(x, y - 1) && _IsMovableCB(x + 1, y - 1))
+		if (!IsMovable(x, y - 1) && IsMovable(x + 1, y - 1))
 			direction |= NODE_DIRECTION_RU;
 
 		// RD 방향의 좌하측 코너를 확인한다.
-		if (!_IsMovableCB(x - 1, y) && _IsMovableCB(x - 1, y + 1))
+		if (!IsMovable(x - 1, y) && IsMovable(x - 1, y + 1))
 			direction |= NODE_DIRECTION_LD;
 
 		// RD 방향의 우측 코너를 탐색한다.
@@ -424,7 +424,7 @@ bool JumpPointSearch::SearchRDCorner(int x, int y, JumpPoint* point)
 bool JumpPointSearch::SearchDDCorner(int x, int y, JumpPoint* point)
 {
 	// 방문한 타일이 이동 가능한 좌표인지 확인한다.
-	while (_IsMovableCB(x, y))
+	while (IsMovable(x, y))
 	{
 		unsigned char direction = NODE_DIRECTION_DD;
 
@@ -438,11 +438,11 @@ bool JumpPointSearch::SearchDDCorner(int x, int y, JumpPoint* point)
 		}
 
 		// DD 방향의 좌하측 코너를 확인한다.
-		if (!_IsMovableCB(x - 1, y) && _IsMovableCB(x - 1, y + 1))
+		if (!IsMovable(x - 1, y) && IsMovable(x - 1, y + 1))
 			direction |= NODE_DIRECTION_LD;
 
 		// DD 방향의 우상측 코너를 확인한다.
-		if (!_IsMovableCB(x + 1, y) && _IsMovableCB(x + 1, y + 1))
+		if (!IsMovable(x + 1, y) && IsMovable(x + 1, y + 1))
 			direction |= NODE_DIRECTION_RD;
 
 		if (direction > NODE_DIRECTION_DD)
@@ -460,7 +460,7 @@ bool JumpPointSearch::SearchDDCorner(int x, int y, JumpPoint* point)
 bool JumpPointSearch::SearchLDCorner(int x, int y, JumpPoint* point)
 {
 	// 방문한 타일이 이동 가능한 좌표인지 확인한다.
-	while (_IsMovableCB(x, y))
+	while (IsMovable(x, y))
 	{
 		unsigned char direction = NODE_DIRECTION_LD;
 
@@ -474,11 +474,11 @@ bool JumpPointSearch::SearchLDCorner(int x, int y, JumpPoint* point)
 		};
 		
 		// LD 방향의 좌상측 코너를 탐색한다.
-		if (!_IsMovableCB(x, y - 1) && _IsMovableCB(x - 1, y - 1))
+		if (!IsMovable(x, y - 1) && IsMovable(x - 1, y - 1))
 			direction |= NODE_DIRECTION_LU;
 
 		// LD 방향의 우하측 코너를 탐색한다.
-		if (!_IsMovableCB(x + 1, y) && _IsMovableCB(x + 1, y + 1))
+		if (!IsMovable(x + 1, y) && IsMovable(x + 1, y + 1))
 			direction |= NODE_DIRECTION_RD;
 
 		// LD 방향의 좌측 코너를 탐색한다.
@@ -524,7 +524,7 @@ void JumpPointSearch::OptimizeStraightPath(std::list<Point> & route)
 		_bresenham.Line(source->xPos, source->yPos, dest->xPos, dest->yPos);
 		while (_bresenham.GetPoint(&point))
 		{
-			if (!_IsMovableCB(point.xPos, point.yPos))
+			if (!IsMovable(point.xPos, point.yPos))
 			{
 				straightPath = false;
 				break;

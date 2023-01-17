@@ -1,6 +1,6 @@
 #include "Astar.h"
 
-Astar::Astar(std::function<bool(int, int)> callback) : _IsMovableCB(callback), _objectPool(0, false)
+Astar::Astar(std::function<bool(int, int)> callback) : _callback(callback), _objectPool(0, false)
 {
 }
 Astar::~Astar()
@@ -113,35 +113,35 @@ void Astar::MakeNode(NODE * parent, int x, int y, bool diagonal)
 void Astar::MakeEightDirectionNode(NODE * parent)
 {
 	// Direction Left
-	if (_IsMovableCB(parent->xPos - 1, parent->yPos))
+	if (IsMovable(parent->xPos - 1, parent->yPos))
 		MakeNode(parent, parent->xPos - 1, parent->yPos, false);
 
 	// Direction Left UP (대각선)
-	if (_IsMovableCB(parent->xPos - 1, parent->yPos - 1))
+	if (IsMovable(parent->xPos - 1, parent->yPos - 1))
 		MakeNode(parent, parent->xPos - 1, parent->yPos - 1, true);
 
 	// Direction UP
-	if (_IsMovableCB(parent->xPos, parent->yPos - 1))
+	if (IsMovable(parent->xPos, parent->yPos - 1))
 		MakeNode(parent, parent->xPos, parent->yPos - 1, false);
 
 	// Direction Right UP (대각선)
-	if (_IsMovableCB(parent->xPos + 1, parent->yPos - 1))
+	if (IsMovable(parent->xPos + 1, parent->yPos - 1))
 		MakeNode(parent, parent->xPos + 1, parent->yPos - 1, true);
 
 	// Direction Right
-	if (_IsMovableCB(parent->xPos + 1, parent->yPos))
+	if (IsMovable(parent->xPos + 1, parent->yPos))
 		MakeNode(parent, parent->xPos + 1, parent->yPos, false);
 
 	// Direction Right Down (대각선)
-	if (_IsMovableCB(parent->xPos + 1, parent->yPos + 1))
+	if (IsMovable(parent->xPos + 1, parent->yPos + 1))
 		MakeNode(parent, parent->xPos + 1, parent->yPos + 1, true);
 
 	// Direction Down
-	if (_IsMovableCB(parent->xPos, parent->yPos + 1))
+	if (IsMovable(parent->xPos, parent->yPos + 1))
 		MakeNode(parent, parent->xPos, parent->yPos + 1, false);
 
 	// Direction Left Down (대각선)
-	if (_IsMovableCB(parent->xPos - 1, parent->yPos + 1))
+	if (IsMovable(parent->xPos - 1, parent->yPos + 1))
 		MakeNode(parent, parent->xPos - 1, parent->yPos + 1, true);
 }
 bool Astar::IsDiagonal(int srcX, int srcY, int dstX, int dstY)
