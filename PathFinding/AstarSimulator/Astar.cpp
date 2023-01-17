@@ -1,6 +1,6 @@
 #include "Astar.h"
 
-Astar::Astar(bool(*func)(int, int)) : _IsMovableCB(func), _objectPool(0, false)
+Astar::Astar(std::function<bool(int, int)> callback) : _IsMovableCB(callback), _objectPool(0, false)
 {
 }
 Astar::~Astar()
@@ -14,7 +14,7 @@ bool Astar::FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& a
 	_destination.yPos = dstY;
 
 	// 시작 노드 생성
-	Node* node = _objectPool.Alloc();
+	NODE* node = _objectPool.Alloc();
 	node->G = 0.0f;
 	node->H = abs(dstX - srcX) + abs(dstY - srcY);
 	node->F = node->G + node->H;
@@ -27,7 +27,7 @@ bool Astar::FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& a
 	{
 		// 오픈리스트에서 노드 꺼내기
 		auto iter = _openList.begin();
-		Node* node = *iter;
+		NODE* node = *iter;
 
 		// 오픈리스트에서 꺼낸 노드를 클로즈리스트로 이동
 		_openList.erase(iter);
@@ -56,18 +56,18 @@ void Astar::DestroyList()
 	// 오픈리스트와 클로즈리스트를 정리한다.
 	for (auto iter = _openList.begin(); iter != _openList.end();)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		_objectPool.Free(node);
 		iter = _openList.erase(iter);
 	}
 	for (auto iter = _closeList.begin(); iter != _closeList.end();)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		_objectPool.Free(node);
 		iter = _closeList.erase(iter);
 	}
 }
-void Astar::MakeNode(Node * parent, int x, int y, bool diagonal)
+void Astar::MakeNode(NODE * parent, int x, int y, bool diagonal)
 {
 	float g = parent->G;
 	if (IsDiagonal(parent->xPos, parent->yPos, x, y))
@@ -78,7 +78,7 @@ void Astar::MakeNode(Node * parent, int x, int y, bool diagonal)
 	// 생성하려는 노드가 클로즈리스트에 이미 존재할 경우 방문했던 타일이므로 생성하지 않고 나간다.
 	for (auto iter = _closeList.begin(); iter != _closeList.end(); ++iter)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		if (node->xPos == x && node->yPos == y)
 			return;
 	}
@@ -86,7 +86,7 @@ void Astar::MakeNode(Node * parent, int x, int y, bool diagonal)
 	// 생성하려는 노드가 오픈리스트에 이미 존재할 경우 G 값을 비교하여 최적값으로 갱신한다.
 	for (auto iter = _openList.begin(); iter != _openList.end(); ++iter)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		if (node->xPos == x && node->yPos == y)
 		{
 			if (node->G > g)
@@ -101,7 +101,7 @@ void Astar::MakeNode(Node * parent, int x, int y, bool diagonal)
 		}
 	}
 
-	Node* node = _objectPool.Alloc();
+	NODE* node = _objectPool.Alloc();
 	node->G = g;
 	node->H = abs(_destination.xPos - x) + abs(_destination.yPos - y);
 	node->F = node->G + node->H;
@@ -110,7 +110,7 @@ void Astar::MakeNode(Node * parent, int x, int y, bool diagonal)
 	node->parent = parent;
 	_openList.insert(node);
 }
-void Astar::MakeEightDirectionNode(Node * parent)
+void Astar::MakeEightDirectionNode(NODE * parent)
 {
 	// Direction Left
 	if (_IsMovableCB(parent->xPos - 1, parent->yPos))

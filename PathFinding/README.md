@@ -28,7 +28,7 @@
 <br>
 
 ## Tech
-* C++ Win32 API
+* Win32 API
 * Astar Algorithm
 * JumpPointSearch Algorithm
 * Heuristics

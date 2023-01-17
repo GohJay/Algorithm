@@ -14,9 +14,9 @@ private:
 		int yPos;
 		unsigned char direction;
 	};
-	struct Node
+	struct NODE
 	{
-		bool operator() (const Node* a, const Node* b) const
+		bool operator() (const NODE* a, const NODE* b) const
 		{
 			return a->F < b->F;
 		}
@@ -26,19 +26,17 @@ private:
 		int xPos;
 		int yPos;
 		unsigned char direction;
-		Node* parent;
+		NODE* parent;
 	};
 public:
-	template<typename T>
-	JumpPointSearch(bool(T::* mem_func)(int, int), T* obj);
-	JumpPointSearch(bool(*func)(int, int));
+	JumpPointSearch(std::function<bool(int, int)> callback);
 	~JumpPointSearch();
 public:
 	bool FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& route);
 private:
 	void DestroyList();
-	void JumpProc(Node* node);
-	void MakeNode(Node* parent, const JumpPoint& point);
+	void JumpProc(NODE* node);
+	void MakeNode(NODE* parent, const JumpPoint& point);
 	bool SearchLLCorner(int x, int y, JumpPoint* point);
 	bool SearchLUCorner(int x, int y, JumpPoint* point);
 	bool SearchUUCorner(int x, int y, JumpPoint* point);
@@ -51,15 +49,10 @@ private:
 	void OptimizeStraightPath(std::list<Point>& route);
 private:
 	std::function<bool(int, int)> _IsMovableCB;
-	Jay::ObjectPool<Node> _objectPool;
-	std::multiset<Node*, Node> _openList;
-	std::list<Node*> _closeList;
+	Jay::ObjectPool<NODE> _objectPool;
+	std::multiset<NODE*, NODE> _openList;
+	std::list<NODE*> _closeList;
 	Point _destination;
 	StraightLine _bresenham;
 };
-template<typename T>
-JumpPointSearch::JumpPointSearch(bool(T::* mem_func)(int, int), T* obj) : _objectPool(0, false)
-{
-	_IsMovableCB = std::bind(mem_func, obj, std::placeholders::_1, std::placeholders::_2);
-}
 typedef JumpPointSearch JPS;

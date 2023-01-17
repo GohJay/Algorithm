@@ -14,7 +14,7 @@
 JumpPointSearch_GDI::JumpPointSearch_GDI(char map[][MAX_WIDTH], int width, int height)
 	: _map(map), _width(width), _height(height), _state(JPS_GDI::DEPARTURE), _objectPool(0, false)
 {
-	_JPS = new JPS(&JPS_GDI::IsMovable, this);
+	_JPS = new JPS(std::bind(&JPS_GDI::IsMovable, this, std::placeholders::_1, std::placeholders::_2));
 	InitColorTable();
 	InitColorMap();
 	_hPen[GRID] = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
@@ -63,7 +63,7 @@ bool JumpPointSearch_GDI::FindPathOnce()
 		DestroyList();
 		{
 			// 시작 노드 생성
-			Node* node = _objectPool.Alloc();
+			NODE* node = _objectPool.Alloc();
 			node->G = 0.0f;
 			node->H = abs(_destination.xPos - _source.xPos) + abs(_destination.yPos - _source.yPos);
 			node->F = node->G + node->H;
@@ -85,7 +85,7 @@ bool JumpPointSearch_GDI::FindPathOnce()
 			}
 
 			// 오픈리스트에서 꺼낸 노드를 클로즈리스트로 이동
-			Node* node = *iter;
+			NODE* node = *iter;
 			_openList.erase(iter);
 			_closeList.push_back(node);
 
@@ -208,7 +208,7 @@ void JumpPointSearch_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, I
 		HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, _hBrush[OPEN]);
 		for (auto iter = _openList.begin(); iter != _openList.end(); ++iter)
 		{
-			Node* node = *iter;
+			NODE* node = *iter;
 			if (node->xPos < screanX || node->yPos < screanY)
 				continue;
 
@@ -228,7 +228,7 @@ void JumpPointSearch_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, I
 		HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, _hBrush[CLOSE]);
 		for (auto iter = _closeList.begin(); iter != _closeList.end(); ++iter)
 		{
-			Node* node = *iter;
+			NODE* node = *iter;
 			if (node->xPos < screanX || node->yPos < screanY)
 				continue;
 
@@ -297,7 +297,7 @@ void JumpPointSearch_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, I
 		{
 			// 직선 경로가 최적화되지 않은 노선을 그린다.
 			HPEN hOldPen = (HPEN)SelectObject(hdc, _hPen[TRACKING]);
-			Node* node = _tracker;
+			NODE* node = _tracker;
 			for (;;)
 			{
 				if (node == nullptr)
@@ -319,7 +319,7 @@ void JumpPointSearch_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, I
 		break;
 	}
 }
-void JumpPointSearch_GDI::RenderNodeInfo(HDC hdc, INT screanX, INT screanY, INT scale, Node* node)
+void JumpPointSearch_GDI::RenderNodeInfo(HDC hdc, INT screanX, INT screanY, INT scale, NODE* node)
 {
 	int iX = (node->xPos - screanX) * scale;
 	int iY = (node->yPos - screanY) * scale;
@@ -429,19 +429,19 @@ void JumpPointSearch_GDI::DestroyList()
 	// 오픈리스트와 클로즈리스트를 정리한다.
 	for (auto iter = _openList.begin(); iter != _openList.end();)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		_objectPool.Free(node);
 		iter = _openList.erase(iter);
 	}
 	for (auto iter = _closeList.begin(); iter != _closeList.end();)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		_objectPool.Free(node);
 		iter = _closeList.erase(iter);
 	}
 	_route.clear();
 }
-void JumpPointSearch_GDI::JumpProc(Node * node)
+void JumpPointSearch_GDI::JumpProc(NODE * node)
 {
 	// 점프포인트서치를 수행한다.
 	JumpPoint point;
@@ -487,7 +487,7 @@ void JumpPointSearch_GDI::JumpProc(Node * node)
 	}
 	_selColor++;
 }
-void JumpPointSearch_GDI::MakeNode(Node * parent, const JumpPoint& point)
+void JumpPointSearch_GDI::MakeNode(NODE * parent, const JumpPoint& point)
 {
 	float g = parent->G;
 	if (IsDiagonal(parent->xPos, parent->yPos, point.xPos, point.yPos))
@@ -503,14 +503,14 @@ void JumpPointSearch_GDI::MakeNode(Node * parent, const JumpPoint& point)
 	for (auto iter = _closeList.begin(); iter != _closeList.end(); ++iter)
 	{
 		// 생성하려는 노드가 클로즈리스트에 이미 존재할 경우 방문했던 타일이므로 생성하지 않고 나간다.
-		Node* node = *iter;
+		NODE* node = *iter;
 		if (node->xPos == point.xPos && node->yPos == point.yPos)
 			return;
 	}
 
 	for (auto iter = _openList.begin(); iter != _openList.end(); ++iter)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		if (node->xPos == point.xPos && node->yPos == point.yPos)
 		{
 			// 생성하려는 노드가 오픈리스트에 이미 존재할 경우 G 값을 비교하여 최적값으로 갱신한다.
@@ -527,7 +527,7 @@ void JumpPointSearch_GDI::MakeNode(Node * parent, const JumpPoint& point)
 		}
 	}
 
-	Node* node = _objectPool.Alloc();
+	NODE* node = _objectPool.Alloc();
 	node->G = g;
 	node->H = abs(_destination.xPos - point.xPos) + abs(_destination.yPos - point.yPos);
 	node->F = node->G + node->H;

@@ -16,9 +16,9 @@ private:
 		int yPos;
 		unsigned char direction;
 	};
-	struct Node
+	struct NODE
 	{
-		bool operator() (const Node* a, const Node* b) const
+		bool operator() (const NODE* a, const NODE* b) const
 		{
 			return a->F < b->F;
 		}
@@ -28,7 +28,7 @@ private:
 		int xPos;
 		int yPos;
 		unsigned char direction;
-		Node* parent;
+		NODE* parent;
 	};
 	enum TRAVEL_STATE
 	{
@@ -65,15 +65,15 @@ private:
 	void RenderGrid(HDC hdc, INT screanX, INT screanY, INT scale);
 	void RenderObstacle(HDC hdc, INT screanX, INT screanY, INT scale);
 	void RenderPathfinding(HDC hdc, INT screanX, INT screanY, INT scale);
-	void RenderNodeInfo(HDC hdc, INT screanX, INT screanY, INT scale, Node* node);
+	void RenderNodeInfo(HDC hdc, INT screanX, INT screanY, INT scale, NODE* node);
 	void RenderTileColor(HDC hdc, INT screanX, INT screanY, INT scale);
 	void InitColorTable();
 	void InitColorMap();
 	void ResetColorMap();
 private:
 	void DestroyList();	
-	void JumpProc(Node* node);
-	void MakeNode(Node* parent, const JumpPoint& point);
+	void JumpProc(NODE* node);
+	void MakeNode(NODE* parent, const JumpPoint& point);
 	bool SearchLLCorner(int x, int y, JumpPoint* point);
 	bool SearchLUCorner(int x, int y, JumpPoint* point);
 	bool SearchUUCorner(int x, int y, JumpPoint* point);
@@ -87,11 +87,11 @@ private:
 	bool IsMovable(int x, int y);
 private:
 	TRAVEL_STATE _state;
-	Jay::ObjectPool<Node> _objectPool;
-	std::multiset<Node*, Node> _openList;
-	std::list<Node*> _closeList;
-	Node* _traveler;
-	Node* _tracker;
+	Jay::ObjectPool<NODE> _objectPool;
+	std::multiset<NODE*, NODE> _openList;
+	std::list<NODE*> _closeList;
+	NODE* _traveler;
+	NODE* _tracker;
 	std::list<JPS::Point> _route;
 	StraightLine _bresenham;
 	IPathFinding* _JPS;
@@ -107,8 +107,7 @@ private:
 	HPEN _hPen[3];
 	HBRUSH _hBrush[6];
 };
-inline
-	bool JumpPointSearch_GDI::IsMovable(int x, int y)
+inline bool JumpPointSearch_GDI::IsMovable(int x, int y)
 {
 	if (x < 0 || y < 0 || x >= _width || y >= _height)
 		return false;

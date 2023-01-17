@@ -7,9 +7,9 @@
 class Astar : public IPathFinding
 {
 private:
-	struct Node
+	struct NODE
 	{
-		bool operator() (const Node* a, const Node* b) const
+		bool operator() (const NODE* a, const NODE* b) const
 		{
 			return a->F < b->F;
 		}
@@ -19,29 +19,22 @@ private:
 		int xPos;
 		int yPos;
 		unsigned char direction;
-		Node* parent;
+		NODE* parent;
 	};
 public:
-	template<typename T>
-	Astar(bool(T::* mem_func)(int, int), T* obj);
-	Astar(bool(*func)(int, int));
+	Astar(std::function<bool(int, int)> callback);
 	~Astar();
 public:
 	bool FindPath(int srcX, int srcY, int dstX, int dstY, std::list<Point>& route);
 private:
 	void DestroyList();
-	void MakeNode(Node* parent, int x, int y, bool diagonal);
-	void MakeEightDirectionNode(Node* parent);
+	void MakeNode(NODE* parent, int x, int y, bool diagonal);
+	void MakeEightDirectionNode(NODE* parent);
 	bool IsDiagonal(int srcX, int srcY, int dstX, int dstY);
 private:
 	std::function<bool(int, int)> _IsMovableCB;
-	Jay::ObjectPool<Node> _objectPool;
-	std::multiset<Node*, Node> _openList;
-	std::list<Node*> _closeList;
+	Jay::ObjectPool<NODE> _objectPool;
+	std::multiset<NODE*, NODE> _openList;
+	std::list<NODE*> _closeList;
 	Point _destination;
 };
-template<typename T>
-Astar::Astar(bool(T::* mem_func)(int, int), T * obj) : _objectPool(0, false)
-{
-	_IsMovableCB = std::bind(mem_func, obj, std::placeholders::_1, std::placeholders::_2);
-}

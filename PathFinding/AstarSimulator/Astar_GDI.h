@@ -9,9 +9,9 @@
 class Astar_GDI
 {
 private:
-	struct Node
+	struct NODE
 	{
-		bool operator() (const Node* a, const Node* b) const
+		bool operator() (const NODE* a, const NODE* b) const
 		{
 			return a->F < b->F;
 		}
@@ -20,7 +20,7 @@ private:
 		float F;
 		int xPos;
 		int yPos;
-		Node* parent;
+		NODE* parent;
 	};
 	enum TRAVLE_STATE
 	{
@@ -58,17 +58,17 @@ private:
 	void RenderPathfinding(HDC hdc, INT screanX, INT screanY, INT scale);
 private:
 	void DestroyList();
-	void MakeNode(Node* parent, int x, int y, bool diagonal);
-	void MakeEightDirectionNode(Node* parent);
+	void MakeNode(NODE* parent, int x, int y, bool diagonal);
+	void MakeEightDirectionNode(NODE* parent);
 	bool IsDiagonal(int srcX, int srcY, int dstX, int dstY);
 	bool IsMovable(int x, int y);
 private:
 	TRAVLE_STATE _state;
-	Jay::ObjectPool<Node> _objectPool;
-	std::multiset<Node*, Node> _openList;
-	std::list<Node*> _closeList;
-	Node* _traveler;
-	Node* _tracker;
+	Jay::ObjectPool<NODE> _objectPool;
+	std::multiset<NODE*, NODE> _openList;
+	std::list<NODE*> _closeList;
+	NODE* _traveler;
+	NODE* _tracker;
 	IPathFinding* _Astar;
 	IPathFinding::Point _source;
 	IPathFinding::Point _destination;

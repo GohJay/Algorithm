@@ -4,7 +4,7 @@
 Astar_GDI::Astar_GDI(char map[][MAX_WIDTH], int width, int height)
 	: _map(map), _width(width), _height(height), _state(Astar_GDI::DEPARTURE), _objectPool(0, false)
 {
-	_Astar = new Astar(&Astar_GDI::IsMovable, this);
+	_Astar = new Astar(std::bind(&Astar_GDI::IsMovable, this, std::placeholders::_1, std::placeholders::_2));
 	_hPen[GRID] = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
 	_hPen[TRAVLING] = CreatePen(PS_SOLID, 2, RGB(0, 255, 0));
 	_hBrush[OBSTACLE] = CreateSolidBrush(RGB(100, 100, 100));
@@ -47,7 +47,7 @@ bool Astar_GDI::FindPathOnce()
 		DestroyList();
 		{
 			// 시작 노드 생성
-			Node* node = _objectPool.Alloc();
+			NODE* node = _objectPool.Alloc();
 			node->G = 0.0f;
 			node->H = abs(_destination.xPos - _source.xPos) + abs(_destination.yPos - _source.yPos);
 			node->F = node->G + node->H;
@@ -68,7 +68,7 @@ bool Astar_GDI::FindPathOnce()
 			}
 
 			// 오픈리스트에서 꺼낸 노드를 클로즈리스트로 이동
-			Node* node = *iter;
+			NODE* node = *iter;
 			_openList.erase(iter);
 			_closeList.push_back(node);
 
@@ -173,7 +173,7 @@ void Astar_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, INT scale)
 		HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, _hBrush[OPEN]);
 		for (auto iter = _openList.begin(); iter != _openList.end(); ++iter)
 		{
-			Node* node = *iter;
+			NODE* node = *iter;
 			if (node->xPos < screanX || node->yPos < screanY)
 				continue;
 
@@ -203,7 +203,7 @@ void Astar_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, INT scale)
 		HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, _hBrush[CLOSE]);
 		for (auto iter = _closeList.begin(); iter != _closeList.end(); ++iter)
 		{
-			Node* node = *iter;
+			NODE* node = *iter;
 			if (node->xPos < screanX || node->yPos < screanY)
 				continue;
 
@@ -267,7 +267,7 @@ void Astar_GDI::RenderPathfinding(HDC hdc, INT screanX, INT screanY, INT scale)
 		{
 			// 찾기 완료한 노드와 해당 노드의 부모를 선으로 이어준다.
 			HPEN hOldPen = (HPEN)SelectObject(hdc, _hPen[TRACKING]);
-			Node* node = _tracker;
+			NODE* node = _tracker;
 			for (;;)
 			{
 				if (node == nullptr)
@@ -294,18 +294,18 @@ void Astar_GDI::DestroyList()
 	// 오픈리스트와 클로즈리스트를 정리한다.
 	for (auto iter = _openList.begin(); iter != _openList.end();)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		_objectPool.Free(node);
 		iter = _openList.erase(iter);
 	}
 	for (auto iter = _closeList.begin(); iter != _closeList.end();)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		_objectPool.Free(node);
 		iter = _closeList.erase(iter);
 	}
 }
-void Astar_GDI::MakeNode(Node* parent, int x, int y, bool diagonal)
+void Astar_GDI::MakeNode(NODE* parent, int x, int y, bool diagonal)
 {
 	float g = parent->G;
 	if (IsDiagonal(parent->xPos, parent->yPos, x, y))
@@ -316,7 +316,7 @@ void Astar_GDI::MakeNode(Node* parent, int x, int y, bool diagonal)
 	// 생성하려는 노드가 클로즈리스트에 이미 존재할 경우 방문했던 타일이므로 생성하지 않고 나간다.
 	for (auto iter = _closeList.begin(); iter != _closeList.end(); ++iter)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		if (node->xPos == x && node->yPos == y)
 			return;
 	}
@@ -324,7 +324,7 @@ void Astar_GDI::MakeNode(Node* parent, int x, int y, bool diagonal)
 	// 생성하려는 노드가 오픈리스트에 이미 존재할 경우 G 값을 비교하여 최적값으로 갱신한다.
 	for (auto iter = _openList.begin(); iter != _openList.end(); ++iter)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		if (node->xPos == x && node->yPos == y)
 		{
 			if (node->G > g)
@@ -339,7 +339,7 @@ void Astar_GDI::MakeNode(Node* parent, int x, int y, bool diagonal)
 		}
 	}
 	
-	Node* node = _objectPool.Alloc();
+	NODE* node = _objectPool.Alloc();
 	node->G = g;
 	node->H = abs(_destination.xPos - x) + abs(_destination.yPos - y);
 	node->F = node->G + node->H;
@@ -348,7 +348,7 @@ void Astar_GDI::MakeNode(Node* parent, int x, int y, bool diagonal)
 	node->parent = parent;
 	_openList.insert(node);
 }
-void Astar_GDI::MakeEightDirectionNode(Node * parent)
+void Astar_GDI::MakeEightDirectionNode(NODE * parent)
 {
 	// Direction Left
 	if (IsMovable(parent->xPos - 1, parent->yPos))

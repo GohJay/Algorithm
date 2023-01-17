@@ -10,7 +10,7 @@
 #define NODE_DIRECTION_LD		NODE_DIRECTION_LL << 7
 #define NODE_DIRECTION_ALL		0xff
 
-JumpPointSearch::JumpPointSearch(bool(*func)(int, int)) : _IsMovableCB(func), _objectPool(0, false)
+JumpPointSearch::JumpPointSearch(std::function<bool(int, int)> callback) : _IsMovableCB(callback), _objectPool(0, false)
 {
 }
 JumpPointSearch::~JumpPointSearch()
@@ -24,7 +24,7 @@ bool JumpPointSearch::FindPath(int srcX, int srcY, int dstX, int dstY, std::list
 	_destination.yPos = dstY;
 
 	// 시작 노드 생성
-	Node* node = _objectPool.Alloc();
+	NODE* node = _objectPool.Alloc();
 	node->G = 0.0f;
 	node->H = abs(dstX - srcX) + abs(dstY - srcY);
 	node->F = node->G + node->H;
@@ -38,7 +38,7 @@ bool JumpPointSearch::FindPath(int srcX, int srcY, int dstX, int dstY, std::list
 	{
 		// 오픈리스트에서 노드 꺼내기
 		auto iter = _openList.begin();
-		Node* node = *iter;
+		NODE* node = *iter;
 
 		// 오픈리스트에서 꺼낸 노드를 클로즈리스트로 이동
 		_openList.erase(iter);
@@ -72,18 +72,18 @@ void JumpPointSearch::DestroyList()
 	// 오픈리스트와 클로즈리스트를 정리한다.
 	for (auto iter = _openList.begin(); iter != _openList.end();)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		_objectPool.Free(node);
 		iter = _openList.erase(iter);
 	}
 	for (auto iter = _closeList.begin(); iter != _closeList.end();)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		_objectPool.Free(node);
 		iter = _closeList.erase(iter);
 	}
 }
-void JumpPointSearch::JumpProc(Node * node)
+void JumpPointSearch::JumpProc(NODE * node)
 {
 	// 점프포인트서치를 수행한다.
 	JumpPoint point;
@@ -128,7 +128,7 @@ void JumpPointSearch::JumpProc(Node * node)
 			MakeNode(node, point);
 	}
 }
-void JumpPointSearch::MakeNode(Node * parent, const JumpPoint& point)
+void JumpPointSearch::MakeNode(NODE * parent, const JumpPoint& point)
 {
 	float g = parent->G;
 	if (IsDiagonal(parent->xPos, parent->yPos, point.xPos, point.yPos))
@@ -144,14 +144,14 @@ void JumpPointSearch::MakeNode(Node * parent, const JumpPoint& point)
 	// 생성하려는 노드가 클로즈리스트에 이미 존재할 경우 방문했던 타일이므로 생성하지 않고 나간다.
 	for (auto iter = _closeList.begin(); iter != _closeList.end(); ++iter)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		if (node->xPos == point.xPos && node->yPos == point.yPos)
 			return;
 	}
 
 	for (auto iter = _openList.begin(); iter != _openList.end(); ++iter)
 	{
-		Node* node = *iter;
+		NODE* node = *iter;
 		if (node->xPos == point.xPos && node->yPos == point.yPos)
 		{
 			// 생성하려는 노드가 오픈리스트에 이미 존재할 경우 G 값을 비교하여 최적값으로 갱신한다.
@@ -168,7 +168,7 @@ void JumpPointSearch::MakeNode(Node * parent, const JumpPoint& point)
 		}
 	}
 
-	Node* node = _objectPool.Alloc();
+	NODE* node = _objectPool.Alloc();
 	node->G = g;
 	node->H = abs(_destination.xPos - point.xPos) + abs(_destination.yPos - point.yPos);
 	node->F = node->G + node->H;
