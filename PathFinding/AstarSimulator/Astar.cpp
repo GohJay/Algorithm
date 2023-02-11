@@ -1,6 +1,6 @@
 #include "Astar.h"
 
-Astar::Astar(std::function<bool(int, int)> callback) : _callback(callback), _objectPool(0, false)
+Astar::Astar(std::function<bool(int, int)> callback) : _callback(std::move(callback)), _objectPool(0, false)
 {
 }
 Astar::~Astar()

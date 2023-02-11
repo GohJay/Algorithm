@@ -10,7 +10,7 @@
 #define NODE_DIRECTION_LD		NODE_DIRECTION_LL << 7
 #define NODE_DIRECTION_ALL		0xff
 
-JumpPointSearch::JumpPointSearch(std::function<bool(int, int)> callback) : _callback(callback), _objectPool(0, false)
+JumpPointSearch::JumpPointSearch(std::function<bool(int, int)> callback) : _callback(std::move(callback)), _objectPool(0, false)
 {
 }
 JumpPointSearch::~JumpPointSearch()
