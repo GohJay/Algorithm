@@ -4,21 +4,21 @@
 class RedblackTree
 {
 protected:
-	struct Node
+	enum COLOR
 	{
-		enum COLOR
-		{
-			RED,
-			BLACK
-		};
-		Node(int data, Node* parent, Node* left, Node* right, COLOR color)
+		RED,
+		BLACK
+	};
+	struct NODE
+	{
+		NODE(int data, NODE* parent, NODE* left, NODE* right, COLOR color)
 			: _data(data), _parent(parent), _left(left), _right(right), _color(color)
 		{
 		}
 		int _data;
-		Node* _parent;
-		Node* _left;
-		Node* _right;
+		NODE* _parent;
+		NODE* _left;
+		NODE* _right;
 		COLOR _color;
 	};
 public:
@@ -31,19 +31,19 @@ public:
 	void Draw(HDC hdc, int x, int y);
 	int size();
 private:
-	Node* InsertNode(Node** tree, int node);
-	Node* RemoveNode(Node** tree, int data);
-	void DestroyTree(Node* tree);
-	void RebuildAfterInsert(Node* node);
-	void RebuildAfterRemove(Node* node);
-	void RotateRight(Node* parent);
-	void RotateLeft(Node* parent);
-	Node* SearchMinNode(Node* tree);
-	Node* SearchMaxNode(Node* tree);
-	Node* SearchNode(Node* tree, int data);
-	void DrawNode(Node* tree, HDC hdc, int x, int y, int width, int height);
+	NODE* InsertNode(NODE** tree, int node);
+	NODE* RemoveNode(NODE** tree, int data);
+	void DestroyTree(NODE* tree);
+	void RebuildAfterInsert(NODE* node);
+	void RebuildAfterRemove(NODE* node);
+	void RotateRight(NODE* parent);
+	void RotateLeft(NODE* parent);
+	NODE* SearchMinNode(NODE* tree);
+	NODE* SearchMaxNode(NODE* tree);
+	NODE* SearchNode(NODE* tree, int data);
+	void DrawNode(NODE* tree, HDC hdc, int x, int y, int width, int height);
 protected:
-	Node* _root;
-	Node* _Nil;
+	NODE* _root;
+	NODE* _nil;
 	int _count;
 };

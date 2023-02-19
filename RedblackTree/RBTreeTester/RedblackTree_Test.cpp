@@ -10,7 +10,7 @@ RedblackTree_Test::~RedblackTree_Test()
 }
 void RedblackTree_Test::Print(ORDER_TYPE type)
 {
-	if (_root == _Nil)
+	if (_root == _nil)
 		return;
 
 	switch (type)
@@ -42,27 +42,27 @@ void RedblackTree_Test::Verify()
 	cout << "[검증4] 루트 로드로부터 모든 리프 노드까지의 블랙 노드 깊이가 같아야 한다." << endl;
 	cout << "오류 개수: " << VerifyBlackNodeDepth(_root) << endl << endl;
 }
-void RedblackTree_Test::PrintPreorder(Node* tree)
+void RedblackTree_Test::PrintPreorder(NODE* tree)
 {
-	if (tree == _Nil)
+	if (tree == _nil)
 		return;
 
 	cout << tree->_data << " ";
 	PrintPreorder(tree->_left);
 	PrintPreorder(tree->_right);
 }
-void RedblackTree_Test::PrintInorder(Node* tree)
+void RedblackTree_Test::PrintInorder(NODE* tree)
 {
-	if (tree == _Nil)
+	if (tree == _nil)
 		return;
 
 	PrintInorder(tree->_left);
 	cout << tree->_data << " ";
 	PrintInorder(tree->_right);
 }
-void RedblackTree_Test::PrintPostorder(Node* tree)
+void RedblackTree_Test::PrintPostorder(NODE* tree)
 {
-	if (tree == _Nil)
+	if (tree == _nil)
 		return;
 
 	PrintPostorder(tree->_left);
@@ -71,22 +71,22 @@ void RedblackTree_Test::PrintPostorder(Node* tree)
 }
 bool RedblackTree_Test::VerifyRootNode()
 {
-	return _root->_color == Node::COLOR::BLACK;
+	return _root->_color == BLACK;
 }
 bool RedblackTree_Test::VerifyLeafNode()
 {
-	return _Nil->_color == Node::COLOR::BLACK;
+	return _nil->_color == BLACK;
 }
-int RedblackTree_Test::VerifyDoubleRedNode(Node * tree)
+int RedblackTree_Test::VerifyDoubleRedNode(NODE * tree)
 {
-	if (tree == _Nil)
+	if (tree == _nil)
 		return 0;
 
 	int ret = 0;
-	if (tree->_color == Node::COLOR::RED)
+	if (tree->_color == RED)
 	{
-		if (tree->_left->_color != Node::COLOR::BLACK ||
-			tree->_right->_color != Node::COLOR::BLACK)
+		if (tree->_left->_color != BLACK ||
+			tree->_right->_color != BLACK)
 		{
 			ret++;
 		}
@@ -96,9 +96,9 @@ int RedblackTree_Test::VerifyDoubleRedNode(Node * tree)
 	ret += VerifyDoubleRedNode(tree->_right);
 	return ret;
 }
-int RedblackTree_Test::VerifyBlackNodeDepth(Node * tree)
+int RedblackTree_Test::VerifyBlackNodeDepth(NODE * tree)
 {
-	if (tree == _Nil)
+	if (tree == _nil)
 		return 0;
 
 	int ret = 0;
@@ -111,23 +111,23 @@ int RedblackTree_Test::VerifyBlackNodeDepth(Node * tree)
 	ret += VerifyBlackNodeDepth(tree->_right);
 	return ret;
 }
-int RedblackTree_Test::GetLeftBlackNodeDepth(Node * tree)
+int RedblackTree_Test::GetLeftBlackNodeDepth(NODE * tree)
 {
 	int ret = 0;
-	if (tree->_color == Node::COLOR::BLACK)
+	if (tree->_color == BLACK)
 		ret++;
 
-	if (tree != _Nil)
+	if (tree != _nil)
 		ret += GetLeftBlackNodeDepth(tree->_left);
 	return ret;
 }
-int RedblackTree_Test::GetRightBlackNodeDepth(Node * tree)
+int RedblackTree_Test::GetRightBlackNodeDepth(NODE * tree)
 {
 	int ret = 0;
-	if (tree->_color == Node::COLOR::BLACK)
+	if (tree->_color == BLACK)
 		ret++;
 
-	if (tree != _Nil)
+	if (tree != _nil)
 		ret += GetRightBlackNodeDepth(tree->_right);
 	return ret;
 }

@@ -2,17 +2,17 @@
 
 RedblackTree::RedblackTree() : _count(0)
 {
-	_Nil = new Node(0, nullptr, nullptr, nullptr, Node::COLOR::BLACK);
-	_root = _Nil;
+	_nil = new NODE(0, nullptr, nullptr, nullptr, BLACK);
+	_root = _nil;
 }
 RedblackTree::~RedblackTree()
 {
 	DestroyTree(_root);
-	delete _Nil;
+	delete _nil;
 }
 bool RedblackTree::Insert(int data)
 {
-	Node* newNode = InsertNode(&_root, data);
+	NODE* newNode = InsertNode(&_root, data);
 	if (newNode)
 	{
 		RebuildAfterInsert(newNode);
@@ -23,7 +23,7 @@ bool RedblackTree::Insert(int data)
 }
 bool RedblackTree::Remove(int data)
 {
-	Node* delNode = RemoveNode(&_root, data);
+	NODE* delNode = RemoveNode(&_root, data);
 	if (delNode)
 	{
 		delete delNode;
@@ -35,7 +35,7 @@ bool RedblackTree::Remove(int data)
 void RedblackTree::RemoveAll()
 {
 	DestroyTree(_root);
-	_root = _Nil;
+	_root = _nil;
 }
 void RedblackTree::Draw(HDC hdc, int x, int y)
 {
@@ -45,21 +45,21 @@ int RedblackTree::size()
 {
 	return _count;
 }
-RedblackTree::Node* RedblackTree::InsertNode(Node** tree, int data)
+RedblackTree::NODE* RedblackTree::InsertNode(NODE** tree, int data)
 {
-	Node* node;
-	if (*tree == _Nil)
+	NODE* node;
+	if (*tree == _nil)
 	{
-		node = new Node(data, _Nil, _Nil, _Nil, Node::COLOR::RED);
+		node = new NODE(data, _nil, _nil, _nil, RED);
 		*tree = node;
 		return node;
 	}
 
 	if ((*tree)->_data > data)
 	{
-		if ((*tree)->_left == _Nil)
+		if ((*tree)->_left == _nil)
 		{
-			node = new Node(data, *tree, _Nil, _Nil, Node::COLOR::RED);
+			node = new NODE(data, *tree, _nil, _nil, RED);
 			(*tree)->_left = node;
 			return node;
 		}
@@ -68,9 +68,9 @@ RedblackTree::Node* RedblackTree::InsertNode(Node** tree, int data)
 	}
 	else if ((*tree)->_data < data)
 	{
-		if ((*tree)->_right == _Nil)
+		if ((*tree)->_right == _nil)
 		{
-			node = new Node(data, *tree, _Nil, _Nil, Node::COLOR::RED);
+			node = new NODE(data, *tree, _nil, _nil, RED);
 			(*tree)->_right = node;
 			return node;
 		}
@@ -79,9 +79,9 @@ RedblackTree::Node* RedblackTree::InsertNode(Node** tree, int data)
 	}
 	return nullptr;
 }
-RedblackTree::Node* RedblackTree::RemoveNode(Node** tree, int data)
+RedblackTree::NODE* RedblackTree::RemoveNode(NODE** tree, int data)
 {
-	if (*tree == _Nil)
+	if (*tree == _nil)
 		return nullptr;
 
 	if ((*tree)->_data > data)
@@ -90,26 +90,26 @@ RedblackTree::Node* RedblackTree::RemoveNode(Node** tree, int data)
 		return RemoveNode(&(*tree)->_right, data);
 	else
 	{
-		if ((*tree)->_left != _Nil && (*tree)->_right != _Nil)
+		if ((*tree)->_left != _nil && (*tree)->_right != _nil)
 		{
 			// 자식이 양쪽 다 있는 경우
-			Node* min = SearchMinNode((*tree)->_right);
+			NODE* min = SearchMinNode((*tree)->_right);
 			(*tree)->_data = min->_data;
 			return RemoveNode(&min, min->_data);
 		}
 		else
 		{
 			// 자식이 하나 이하인 경우
-			Node* delNode = *tree;
-			Node* childNode;
-			if (delNode->_left != _Nil)
+			NODE* delNode = *tree;
+			NODE* childNode;
+			if (delNode->_left != _nil)
 				childNode = delNode->_left;
 			else
 				childNode = delNode->_right;
 
 			childNode->_parent = delNode->_parent;
 
-			if (delNode->_parent == _Nil)
+			if (delNode->_parent == _nil)
 				_root = childNode;
 			else
 			{
@@ -119,16 +119,16 @@ RedblackTree::Node* RedblackTree::RemoveNode(Node** tree, int data)
 					delNode->_parent->_right = childNode;
 			}
 
-			if (delNode->_color == Node::COLOR::BLACK)
+			if (delNode->_color == BLACK)
 				RebuildAfterRemove(childNode);
 
 			return delNode;
 		}
 	}
 }
-void RedblackTree::DestroyTree(Node* tree)
+void RedblackTree::DestroyTree(NODE* tree)
 {
-	if (tree == _Nil)
+	if (tree == _nil)
 		return;
 
 	DestroyTree(tree->_left);
@@ -136,21 +136,21 @@ void RedblackTree::DestroyTree(Node* tree)
 	delete tree;
 	_count--;
 }
-void RedblackTree::RebuildAfterInsert(Node * node)
+void RedblackTree::RebuildAfterInsert(NODE * node)
 {
 	// 규칙을 위배하는 동안에는 루프를 반복한다.
-	while (node != _root && node->_parent->_color == Node::COLOR::RED)
+	while (node != _root && node->_parent->_color == RED)
 	{
 		// 부모 노드가 할아버지 노드의 왼쪽 자식일 경우
 		if (node->_parent == node->_parent->_parent->_left)
 		{
-			Node* uncle = node->_parent->_parent->_right;
+			NODE* uncle = node->_parent->_parent->_right;
 			// 삼촌이 레드인 경우
-			if (uncle->_color == Node::COLOR::RED)
+			if (uncle->_color == RED)
 			{
-				node->_parent->_color = Node::COLOR::BLACK;
-				uncle->_color = Node::COLOR::BLACK;
-				node->_parent->_parent->_color = Node::COLOR::RED;
+				node->_parent->_color = BLACK;
+				uncle->_color = BLACK;
+				node->_parent->_parent->_color = RED;
 				node = node->_parent->_parent;
 			}
 			else
@@ -161,20 +161,20 @@ void RedblackTree::RebuildAfterInsert(Node * node)
 					node = node->_parent;
 					RotateLeft(node);
 				}
-				node->_parent->_color = Node::COLOR::BLACK;
-				node->_parent->_parent->_color = Node::COLOR::RED;
+				node->_parent->_color = BLACK;
+				node->_parent->_parent->_color = RED;
 				RotateRight(node->_parent->_parent);
 			}
 		}
 		else
 		{
-			Node* uncle = node->_parent->_parent->_left;
+			NODE* uncle = node->_parent->_parent->_left;
 			// 삼촌이 레드인 경우
-			if (uncle->_color == Node::COLOR::RED)
+			if (uncle->_color == RED)
 			{
-				node->_parent->_color = Node::COLOR::BLACK;
-				uncle->_color = Node::COLOR::BLACK;
-				node->_parent->_parent->_color = Node::COLOR::RED;
+				node->_parent->_color = BLACK;
+				uncle->_color = BLACK;
+				node->_parent->_parent->_color = RED;
 				node = node->_parent->_parent;
 			}
 			else
@@ -185,54 +185,54 @@ void RedblackTree::RebuildAfterInsert(Node * node)
 					node = node->_parent;
 					RotateRight(node);
 				}
-				node->_parent->_color = Node::COLOR::BLACK;
-				node->_parent->_parent->_color = Node::COLOR::RED;
+				node->_parent->_color = BLACK;
+				node->_parent->_parent->_color = RED;
 				RotateLeft(node->_parent->_parent);
 			}
 		}
 	}
 	// 루트 노드는 반드시 블랙이어야 한다.
-	_root->_color = Node::COLOR::BLACK;
+	_root->_color = BLACK;
 }
-void RedblackTree::RebuildAfterRemove(Node * node)
+void RedblackTree::RebuildAfterRemove(NODE * node)
 {
-	Node* sibling;
+	NODE* sibling;
 	// 루트 노드가 되거나 레드 노드한테 블랙이 넘어가면 루프 종료
-	while (node->_parent != _Nil && node->_color == Node::COLOR::BLACK)
+	while (node->_parent != _nil && node->_color == BLACK)
 	{
 		if (node == node->_parent->_left)
 		{
 			sibling = node->_parent->_right;
 			// 형제가 레드인 경우
-			if (sibling->_color == Node::COLOR::RED)
+			if (sibling->_color == RED)
 			{
-				sibling->_color = Node::COLOR::BLACK;
-				node->_parent->_color = Node::COLOR::RED;
+				sibling->_color = BLACK;
+				node->_parent->_color = RED;
 				RotateLeft(node->_parent);
 			}
 			else
 			{
 				// 양쪽 자식이 모두 블랙인 경우
-				if (sibling->_left->_color == Node::COLOR::BLACK &&
-					sibling->_right->_color == Node::COLOR::BLACK)
+				if (sibling->_left->_color == BLACK &&
+					sibling->_right->_color == BLACK)
 				{
-					sibling->_color = Node::COLOR::RED;
+					sibling->_color = RED;
 					node = node->_parent;
 				}
 				else
 				{
 					// 왼쪽 자식이 레드인 경우
-					if (sibling->_left->_color == Node::COLOR::RED)
+					if (sibling->_left->_color == RED)
 					{
-						sibling->_left->_color = Node::COLOR::BLACK;
-						sibling->_color = Node::COLOR::RED;
+						sibling->_left->_color = BLACK;
+						sibling->_color = RED;
 						RotateRight(sibling);
 						sibling = node->_parent->_right;
 					}
 					// 오른쪽 자식이 레드인 경우
 					sibling->_color = node->_parent->_color;
-					sibling->_parent->_color = Node::COLOR::BLACK;
-					sibling->_right->_color = Node::COLOR::BLACK;
+					sibling->_parent->_color = BLACK;
+					sibling->_right->_color = BLACK;
 					RotateLeft(node->_parent);
 					node = _root;
 				}
@@ -242,55 +242,55 @@ void RedblackTree::RebuildAfterRemove(Node * node)
 		{
 			sibling = node->_parent->_left;
 			// 형제가 레드인 경우
-			if (sibling->_color == Node::COLOR::RED)
+			if (sibling->_color == RED)
 			{
-				sibling->_color = Node::COLOR::BLACK;
-				node->_parent->_color = Node::COLOR::RED;
+				sibling->_color = BLACK;
+				node->_parent->_color = RED;
 				RotateRight(node->_parent);
 			}
 			else
 			{
 				// 양쪽 자식이 모두 블랙인 경우
-				if (sibling->_right->_color == Node::COLOR::BLACK &&
-					sibling->_left->_color == Node::COLOR::BLACK)
+				if (sibling->_right->_color == BLACK &&
+					sibling->_left->_color == BLACK)
 				{
-					sibling->_color = Node::COLOR::RED;
+					sibling->_color = RED;
 					node = node->_parent;
 				}
 				else
 				{
 					// 오른쪽 자식이 레드인 경우
-					if (sibling->_right->_color == Node::COLOR::RED)
+					if (sibling->_right->_color == RED)
 					{
-						sibling->_right->_color = Node::COLOR::BLACK;
-						sibling->_color = Node::COLOR::RED;
+						sibling->_right->_color = BLACK;
+						sibling->_color = RED;
 
 						RotateLeft(sibling);
 						sibling = node->_parent->_left;
 					}
 					// 왼쪽 자식이 레드인 경우
 					sibling->_color = node->_parent->_color;
-					node->_parent->_color = Node::COLOR::BLACK;
-					sibling->_left->_color = Node::COLOR::BLACK;
+					node->_parent->_color = BLACK;
+					sibling->_left->_color = BLACK;
 					RotateRight(node->_parent);
 					node = _root;
 				}
 			}
 		}
 	}
-	node->_color = Node::COLOR::BLACK;
+	node->_color = BLACK;
 }
-void RedblackTree::RotateRight(Node * parent)
+void RedblackTree::RotateRight(NODE * parent)
 {
-	Node* leftChild = parent->_left;
+	NODE* leftChild = parent->_left;
 	parent->_left = leftChild->_right;
 
-	if (leftChild->_right != _Nil)
+	if (leftChild->_right != _nil)
 		leftChild->_right->_parent = parent;
 
 	leftChild->_parent = parent->_parent;
 
-	if (parent->_parent == _Nil)
+	if (parent->_parent == _nil)
 		_root = leftChild;
 	else
 	{
@@ -303,18 +303,18 @@ void RedblackTree::RotateRight(Node * parent)
 	leftChild->_right = parent;
 	parent->_parent = leftChild;
 }
-void RedblackTree::RotateLeft(Node * parent)
+void RedblackTree::RotateLeft(NODE * parent)
 {
-	Node* rightChild = parent->_right;
+	NODE* rightChild = parent->_right;
 
 	parent->_right = rightChild->_left;
 
-	if (rightChild->_left != _Nil)
+	if (rightChild->_left != _nil)
 		rightChild->_left->_parent = parent;
 
 	rightChild->_parent = parent->_parent;
 
-	if (parent->_parent == _Nil)
+	if (parent->_parent == _nil)
 		_root = rightChild;
 	else
 	{
@@ -327,30 +327,30 @@ void RedblackTree::RotateLeft(Node * parent)
 	rightChild->_left = parent;
 	parent->_parent = rightChild;
 }
-RedblackTree::Node * RedblackTree::SearchMinNode(Node * tree)
+RedblackTree::NODE * RedblackTree::SearchMinNode(NODE * tree)
 {
-	if (tree == _Nil)
-		return _Nil;
+	if (tree == _nil)
+		return _nil;
 
-	if (tree->_left == _Nil)
+	if (tree->_left == _nil)
 		return tree;
 	else
 		return SearchMinNode(tree->_left);
 }
-RedblackTree::Node * RedblackTree::SearchMaxNode(Node * tree)
+RedblackTree::NODE * RedblackTree::SearchMaxNode(NODE * tree)
 {
-	if (tree == _Nil)
-		return _Nil;
+	if (tree == _nil)
+		return _nil;
 
-	if (tree->_right == _Nil)
+	if (tree->_right == _nil)
 		return tree;
 	else
 		return SearchMaxNode(tree->_right);
 }
-RedblackTree::Node * RedblackTree::SearchNode(Node * tree, int data)
+RedblackTree::NODE * RedblackTree::SearchNode(NODE * tree, int data)
 {
-	if (tree == _Nil)
-		return _Nil;
+	if (tree == _nil)
+		return _nil;
 
 	if (tree->_data > data)
 		return SearchNode(tree->_left, data);
@@ -359,18 +359,18 @@ RedblackTree::Node * RedblackTree::SearchNode(Node * tree, int data)
 	else
 		return tree;
 }
-void RedblackTree::DrawNode(Node* tree, HDC hdc, int x, int y, int width, int height)
+void RedblackTree::DrawNode(NODE* tree, HDC hdc, int x, int y, int width, int height)
 {
-	if (tree == _Nil)
+	if (tree == _nil)
 		return;
 	
 	// Draw Line
-	if (tree->_left != _Nil)
+	if (tree->_left != _nil)
 	{
 		MoveToEx(hdc, x, y, NULL);
 		LineTo(hdc, x - (width / 2), y + height);
 	}
-	if (tree->_right != _Nil)
+	if (tree->_right != _nil)
 	{
 		MoveToEx(hdc, x, y, NULL);
 		LineTo(hdc, x + (width / 2), y + height);
@@ -379,7 +379,7 @@ void RedblackTree::DrawNode(Node* tree, HDC hdc, int x, int y, int width, int he
 	RECT rect = { x - 25, y - 25, x + 25, y + 25 };
 
 	// Draw Ellipse
-	COLORREF rgb = (tree->_color == Node::COLOR::RED) ? RGB(255, 0, 0) : RGB(0, 0, 0);
+	COLORREF rgb = (tree->_color == RED) ? RGB(255, 0, 0) : RGB(0, 0, 0);
 	HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, CreateSolidBrush(rgb));
 	Ellipse(hdc, rect.left, rect.top, rect.right, rect.bottom);
 	DeleteObject(SelectObject(hdc, hOldBrush));

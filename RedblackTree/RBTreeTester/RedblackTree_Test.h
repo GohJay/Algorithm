@@ -17,13 +17,13 @@ public:
 	void Print(ORDER_TYPE type = INORDER);
 	void Verify();
 private:
-	void PrintPreorder(Node* tree);
-	void PrintInorder(Node* tree);
-	void PrintPostorder(Node* tree);
+	void PrintPreorder(NODE* tree);
+	void PrintInorder(NODE* tree);
+	void PrintPostorder(NODE* tree);
 	bool VerifyRootNode();
 	bool VerifyLeafNode();
-	int VerifyDoubleRedNode(Node* tree);
-	int VerifyBlackNodeDepth(Node* tree);
-	int GetLeftBlackNodeDepth(Node* tree);
-	int GetRightBlackNodeDepth(Node* tree);
+	int VerifyDoubleRedNode(NODE* tree);
+	int VerifyBlackNodeDepth(NODE* tree);
+	int GetLeftBlackNodeDepth(NODE* tree);
+	int GetRightBlackNodeDepth(NODE* tree);
 };

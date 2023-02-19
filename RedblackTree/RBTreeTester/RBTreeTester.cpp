@@ -1,4 +1,5 @@
 #include "RedblackTree_Test.h"
+#include <stdio.h>
 
 #define COUNT 1000000
 
@@ -13,5 +14,6 @@ int main()
 
 	//RBTreeTester.Print();
 	RBTreeTester.Verify();
+	printf_s("count: %d\n", RBTreeTester.size());
 	return 0;
 }
