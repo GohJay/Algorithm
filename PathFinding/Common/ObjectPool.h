@@ -1,12 +1,7 @@
 #ifndef  __OBJECT_POOL__H_
 #define  __OBJECT_POOL__H_
 
-#define SECURE_MODE 1
-#ifdef _WIN64
-#define MEM_GUARD 0xfdfdfdfdfdfdfdfd
-#else
-#define MEM_GUARD 0xfdfdfdfd
-#endif
+#define SECURE_MODE					1
 
 #include <new.h>
 
@@ -21,60 +16,61 @@ namespace Jay
 				pData 사용
 				MemPool.Free(pData);
 	* @author   고재현
-	* @date		2022-08-25
+	* @date		2022-02-26
 	* @version  1.0.1
 	**/
 	template <typename T>
 	class ObjectPool
 	{
 	private:
-		struct Node
+		struct NODE
 		{
+			T data;
 #if SECURE_MODE
 			size_t signature;
-			size_t underflowGuard;
-			T data;
-			size_t overflowGuard;
-			Node* prev;
-#else
-			T data;
-			Node* prev;
 #endif
+			NODE* prev;
 		};
 	public:
 		/**
 		* @brief	생성자, 소멸자
 		* @details
 		* @param	int(초기 블럭 개수), bool(Alloc 시 생성자 / Free 시 파괴자 호출 여부)
-		* @return	
+		* @return
 		**/
-		ObjectPool(int blockNum, bool placementNew = false) 
-			: _top(nullptr), _placementNew(placementNew), _capacity(blockNum), _useCount(0)
+		ObjectPool(int blockNum, bool placementNew = false)
+			: _top(nullptr), _placementNew(placementNew), _capacity(0), _useCount(0)
 		{
 			while (blockNum > 0)
 			{
-				Node* block = (Node*)malloc(sizeof(Node));
+				NODE* node = (NODE*)malloc(sizeof(NODE));
+				node->prev = _top;
 #if SECURE_MODE
-				block->signature = (size_t)this;
-				block->underflowGuard = MEM_GUARD;
-				block->overflowGuard = MEM_GUARD;
+				node->signature = (size_t)this;
+				_capacity++;
 #endif
-				block->prev = _top;
 				if (!_placementNew)
-					new(&block->data) T();
-				_top = block;
+					new(&node->data) T();
+
+				_top = node;
+
 				blockNum--;
 			}
 		}
 		~ObjectPool()
 		{
+			NODE* prev;
 			while (_top)
 			{
-				Node* prev = _top->prev;
 				if (!_placementNew)
 					_top->data.~T();
+
+				prev = _top->prev;
 				free(_top);
 				_top = prev;
+#if SECURE_MODE
+				_capacity--;
+#endif
 			}
 		}
 	public:
@@ -86,64 +82,66 @@ namespace Jay
 		**/
 		T* Alloc(void)
 		{
-			Node* block;
+			NODE* node;
+
 			if (_top == nullptr)
 			{
-				block = (Node*)malloc(sizeof(Node));
+				node = (NODE*)malloc(sizeof(NODE));
+				new(&node->data) T();
 #if SECURE_MODE
-				block->signature = (size_t)this;
-				block->underflowGuard = MEM_GUARD;
-				block->overflowGuard = MEM_GUARD;
+				node->signature = (size_t)this;
+				_capacity++;
+				_useCount++;
 #endif
-				block->prev = _top;
-				new(&block->data) T();
+				return &node->data;
 			}
-			else
-			{
-				block = _top;
-				if (_placementNew)
-					new(&block->data) T();
-				_top = _top->prev;
-				_capacity--;
-			}
+
+			node = _top;
+			_top = node->prev;
+
+			if (_placementNew)
+				new(&node->data) T();
+
+#if SECURE_MODE
 			_useCount++;
-			return &block->data;
+#endif
+			return &node->data;
 		}
-		
+
 		/**
 		* @brief	사용중이던 블럭을 해제한다.
-		* @details	
+		* @details
 		* @param	T*(데이터 블럭 포인터)
 		* @return	void
 		**/
 		void Free(T* data) throw()
 		{
+			NODE* node = (NODE*)data;
 #if SECURE_MODE
-			Node* block = (Node*)((char*)data - sizeof(size_t) - sizeof(size_t));
-			if (block->signature != (size_t)this)
-				throw std::exception("Incorrect signature");
-			if (block->underflowGuard != MEM_GUARD)
-				throw std::exception("Memory underflow");
-			if (block->overflowGuard != MEM_GUARD)
-				throw std::exception("Memory overflow");
-#else
-			Node* block = (Node*)data;
+			if (node->signature != (size_t)this)
+				throw;
 #endif
 			if (_placementNew)
-				block->data.~T();
-			block->prev = _top;
-			_top = block;
+				node->data.~T();
+
+			node->prev = _top;
+			_top = node;
+
+#if SECURE_MODE
 			_useCount--;
-			_capacity++;
+#endif
 		}
-		
+
 		/**
 		* @brief	현재 확보 된 블럭 개수를 얻는다.(메모리 풀 내부의 전체 개수)
 		* @details
 		* @param	void
 		* @return	int(메모리 풀 내부 전체 블럭 개수)
 		**/
-		int GetCapacityCount(void) { return _capacity; }
+		inline int GetCapacityCount(void)
+		{
+			return _capacity;
+		}
 
 		/**
 		* @brief	현재 사용중인 블럭 개수를 얻는다.
@@ -151,9 +149,12 @@ namespace Jay
 		* @param	void
 		* @return	int(사용중인 블럭 개수)
 		**/
-		int GetUseCount(void) { return _useCount; }
+		inline int GetUseCount(void)
+		{
+			return _useCount;
+		}
 	private:
-		Node* _top;
+		NODE* _top;
 		bool _placementNew;
 		int _capacity;
 		int _useCount;
